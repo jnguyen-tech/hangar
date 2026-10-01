@@ -7,6 +7,7 @@ from datetime import datetime
 
 PROJECT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 RAW_FOLDER = os.path.join(PROJECT_FOLDER, "data", "raw")
+CLEAN_FOLDER = os.path.join(PROJECT_FOLDER, "data", "clean")
 
 
 def parse_date(text):
@@ -237,6 +238,34 @@ def build_clean_jobs():
     file.close()
     return clean_jobs
 
+def add_day_counts(clean_jobs, clean_delays, clean_estimates):
+    """Add calendar-day counts, measured from each job's open date (day 0)."""
+    open_dates = {}
+    for job in clean_jobs:
+        open_date = job["open_date"]
+        open_dates[job["job_id"]] = open_date
+        job["original_target_days"] = (job["original_target"] - open_date).days
+        job["current_target_days"] = (job["current_target"] - open_date).days
+        job["completion_days"] = (job["completion_date"] - open_date).days
+    for delay in clean_delays:
+        open_date = open_dates[delay["job_id"]]
+        delay["logged_day"] = (delay["logged_at"] - open_date).days
+    for estimate in clean_estimates:
+        open_date = open_dates[estimate["job_id"]]
+        estimate["estimated_day"] = (estimate["estimated_at"] - open_date).days
+        estimate["target_days"] = (estimate["target_date"] - open_date).days
+
+
+def write_csv(file_name, rows):
+    """Write a list of dictionaries to a CSV file in data/clean/."""
+    os.makedirs(CLEAN_FOLDER, exist_ok=True)
+    file = open(os.path.join(CLEAN_FOLDER, file_name), "w", encoding="utf-8", newline="")
+    writer = csv.DictWriter(file, fieldnames=list(rows[0].keys()))
+    writer.writeheader()
+    writer.writerows(rows)
+    file.close()
+    print("Wrote", len(rows), "rows to", file_name)
+
 if __name__ == "__main__":
     # Test 1: one example of each format. All four should print as 2024-07-29.
     print(parse_date("2024-07-29"))
@@ -385,3 +414,15 @@ if __name__ == "__main__":
             post_completion_at_finish += 1
     print("Original targets that don't match the estimate history:", original_mismatches)
     print("Post-completion revisions set to the exact finish date:", post_completion_at_finish)
+
+    # Test 10: add day counts, check one job by hand, then save everything.
+    add_day_counts(clean_jobs, clean_delays, clean_estimates)
+    for job in clean_jobs:
+        if job["job_id"] == "JOB-0000058":
+            print("JOB-0000058 opened:", job["open_date"])
+            print("  Original target:", job["original_target"], "=", job["original_target_days"], "days")
+            print("  Finished:", job["completion_date"], "=", job["completion_days"], "days")
+            print("  Days late vs original:", job["completion_days"] - job["original_target_days"])
+    write_csv("jobs.csv", clean_jobs)
+    write_csv("delays.csv", clean_delays)
+    write_csv("estimates.csv", clean_estimates)
