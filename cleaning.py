@@ -211,6 +211,32 @@ def build_clean_estimates(estimates):
         clean_estimates.append(clean_estimate)
     return clean_estimates
 
+def build_clean_jobs():
+    """Read the jobs file and return a list of clean jobs, with flags for logic problems."""
+    clean_jobs = []
+    file = open(os.path.join(RAW_FOLDER, "maintenance_jobs_export.csv"), encoding="utf-8")
+    for row in csv.DictReader(file):
+        open_date = parse_date(row["open_date"])
+        completion_date = parse_date(row["actual_completion_date"])
+        status = clean_status(row["current_status"])
+        job = {
+            "job_id": clean_job_id(row["job_id"]),
+            "asset": row["asset_ref"].strip(),
+            "asset_type": row["asset_type"].strip(),
+            "depot": clean_depot(row["depot"]),
+            "open_date": open_date,
+            "original_target": parse_date(row["original_target_date"]),
+            "current_target": parse_date(row["current_target_date"]),
+            "completion_date": completion_date,
+            "status": status,
+            # Logic problems: flagged, not deleted.
+            "status_conflict": status == "open" and completion_date is not None,
+            "same_day": completion_date == open_date,
+        }
+        clean_jobs.append(job)
+    file.close()
+    return clean_jobs
+
 if __name__ == "__main__":
     # Test 1: one example of each format. All four should print as 2024-07-29.
     print(parse_date("2024-07-29"))
@@ -331,3 +357,31 @@ if __name__ == "__main__":
             jobs_with_gaps += 1
     print("Jobs with estimates:", len(versions_by_job))
     print("Jobs with missing or repeated versions:", jobs_with_gaps)
+
+    # Test 9: build the clean jobs, count the logic problems,
+    # and cross-check the jobs against the estimate history.
+    clean_jobs = build_clean_jobs()
+    print("Clean jobs:", len(clean_jobs))
+    conflicts = 0
+    same_day = 0
+    original_by_job = {}
+    completion_by_job = {}
+    for job in clean_jobs:
+        if job["status_conflict"]:
+            conflicts += 1
+        if job["same_day"]:
+            same_day += 1
+        original_by_job[job["job_id"]] = job["original_target"]
+        completion_by_job[job["job_id"]] = job["completion_date"]
+    print("Jobs marked open that have a completion date:", conflicts)
+    print("Jobs finished the same day they opened:", same_day)
+    original_mismatches = 0
+    post_completion_at_finish = 0
+    for estimate in clean_estimates:
+        job_id = estimate["job_id"]
+        if estimate["type"] == "original" and estimate["target_date"] != original_by_job[job_id]:
+            original_mismatches += 1
+        if estimate["type"] == "post_completion" and estimate["target_date"] == completion_by_job[job_id]:
+            post_completion_at_finish += 1
+    print("Original targets that don't match the estimate history:", original_mismatches)
+    print("Post-completion revisions set to the exact finish date:", post_completion_at_finish)
