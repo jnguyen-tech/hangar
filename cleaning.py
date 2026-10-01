@@ -153,6 +153,37 @@ def days_moved_by_each_delay(estimates):
         days_moved[event_id] = (new_target - old_target).days
     return days_moved
 
+def clean_description(text):
+    """Lowercase a description and spell out the abbreviation "insp"."""
+    words = text.strip().lower().split()
+    for i in range(len(words)):
+        if words[i] == "insp":
+            words[i] = "inspection"
+    return " ".join(words)
+
+
+def build_clean_delays(events, days_moved):
+    """Turn the raw delay rows into a list of clean delays, filling in missing days."""
+    clean_delays = []
+    filled_in = 0
+    for event_id, event in events.items():
+        days = clean_days(event["days_added"])
+        if days is None:
+            days = days_moved[event_id]
+            filled_in += 1
+        delay = {
+            "event_id": event_id,
+            "job_id": clean_job_id(event["job_id"]),
+            "sequence": int(event["event_sequence"]),
+            "logged_at": parse_date(event["logged_at"]),
+            "category": clean_category(event["delay_category"]),
+            "description": clean_description(event["description"]),
+            "days_added": days,
+        }
+        clean_delays.append(delay)
+    print("Missing days filled in from the estimate history:", filled_in)
+    return clean_delays
+
 if __name__ == "__main__":
     # Test 1: one example of each format. All four should print as 2024-07-29.
     print(parse_date("2024-07-29"))
@@ -240,3 +271,15 @@ if __name__ == "__main__":
     print("Valid days that match the estimate history:", matches)
     print("Valid days that don't match:", mismatches)
     print("Missing days that can be recovered:", recovered)
+
+    # Test 7: build the clean delay list and check it.
+    clean_delays = build_clean_delays(events, days_moved)
+    print("Clean delays:", len(clean_delays))
+    descriptions = set()
+    total_days = 0
+    for delay in clean_delays:
+        descriptions.add(delay["description"])
+        total_days += delay["days_added"]
+    print("Different descriptions:", len(descriptions))
+    print("Total delay days:", total_days)
+    print("First clean delay:", clean_delays[0])
