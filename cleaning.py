@@ -184,6 +184,33 @@ def build_clean_delays(events, days_moved):
     print("Missing days filled in from the estimate history:", filled_in)
     return clean_delays
 
+# The raw estimate types, and the shorter names used from here on.
+ESTIMATE_TYPES = {
+    "ORIGINAL": "original",
+    "REVISION": "revision",
+    "POST_COMPLETION_REVISION": "post_completion",
+}
+
+
+def build_clean_estimates(estimates):
+    """Turn the raw estimate rows into a list of clean estimates."""
+    clean_estimates = []
+    for estimate_id, estimate in estimates.items():
+        trigger = estimate["trigger_event_id"].strip()
+        if trigger == "":
+            trigger = None
+        clean_estimate = {
+            "estimate_id": estimate_id,
+            "job_id": clean_job_id(estimate["job_id"]),
+            "version": clean_version(estimate["version"]),
+            "estimated_at": parse_date(estimate["estimated_at"]),
+            "target_date": parse_date(estimate["target_completion_date"]),
+            "trigger_event_id": trigger,
+            "type": ESTIMATE_TYPES[estimate["estimate_type"].strip().upper()],
+        }
+        clean_estimates.append(clean_estimate)
+    return clean_estimates
+
 if __name__ == "__main__":
     # Test 1: one example of each format. All four should print as 2024-07-29.
     print(parse_date("2024-07-29"))
@@ -283,3 +310,24 @@ if __name__ == "__main__":
     print("Different descriptions:", len(descriptions))
     print("Total delay days:", total_days)
     print("First clean delay:", clean_delays[0])
+
+    # Test 8: build the clean estimate list and check each job's versions.
+    clean_estimates = build_clean_estimates(estimates)
+    print("Clean estimates:", len(clean_estimates))
+    type_counts = {}
+    versions_by_job = {}
+    for estimate in clean_estimates:
+        if estimate["type"] not in type_counts:
+            type_counts[estimate["type"]] = 0
+        type_counts[estimate["type"]] += 1
+        if estimate["job_id"] not in versions_by_job:
+            versions_by_job[estimate["job_id"]] = []
+        versions_by_job[estimate["job_id"]].append(estimate["version"])
+    print("Estimate types:", type_counts)
+    jobs_with_gaps = 0
+    for job_id, versions in versions_by_job.items():
+        versions.sort()
+        if versions != list(range(1, len(versions) + 1)):
+            jobs_with_gaps += 1
+    print("Jobs with estimates:", len(versions_by_job))
+    print("Jobs with missing or repeated versions:", jobs_with_gaps)
