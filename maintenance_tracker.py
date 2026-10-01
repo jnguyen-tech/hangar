@@ -96,6 +96,11 @@ class Tracker:
         self.estimates = []
         self.delay_events = []
         self.categories = ["discovered_work", "parts", "staffing", "other"]
+        # Lookup dictionaries, so finding things stays fast with 50,000 jobs.
+        self.job_lookup = {}         # job_id -> that Job
+        self.estimates_by_job = {}   # job_id -> list of that job's Estimates
+        self.delays_by_job = {}      # job_id -> list of that job's DelayEvents
+        self.quiet = False           # True = skip the message for every job and delay
 
     # --- Categories ----------------------------------------------------------
 
@@ -141,13 +146,9 @@ class Tracker:
     # --- Jobs ------------------------------------------------------------------
 
     def find_job(self, job_id):
-        """Return the Job with this id, or None.
-
-        Replaces: find_job() in prototype.py.
-        """
-        for job in self.jobs:
-            if job.job_id == job_id:
-                return job
+        """Return the Job with this id, or None."""
+        if job_id in self.job_lookup:
+            return self.job_lookup[job_id]
         return None
 
     def create_job(self, job_id, asset, planned_days):
@@ -161,10 +162,16 @@ class Tracker:
             print(f"Error: job {job_id} already exists")
             return
 
-        self.jobs.append(Job(job_id, asset))
-        self.estimates.append(Estimate(job_id, 1, planned_days, 0, "original plan", None))
+        job = Job(job_id, asset)
+        estimate = Estimate(job_id, 1, planned_days, 0, "original plan", None)
+        self.jobs.append(job)
+        self.estimates.append(estimate)
+        self.job_lookup[job_id] = job
+        self.estimates_by_job[job_id] = [estimate]
+        self.delays_by_job[job_id] = []
 
-        print(f"Created job {job_id} for {asset}, planned for {planned_days} days")
+        if not self.quiet:
+            print(f"Created job {job_id} for {asset}, planned for {planned_days} days")
 
     def close_job(self, job_id, actual_days):
         """Mark a job closed and record how long it actually took.
@@ -187,7 +194,7 @@ class Tracker:
 
         Replaces: get_estimates_for_job() in prototype.py.
         """
-        return self.rows_for_job(self.estimates, job_id)
+        return self.estimates_by_job[job_id]
 
     def get_original_estimate(self, job_id):
         """The first Estimate for a job.
@@ -204,19 +211,18 @@ class Tracker:
         return self.get_estimates_for_job(job_id)[-1]
 
     def revise_estimate(self, job_id, delay_event):
-        """Append a NEW Estimate based on a DelayEvent. Never change old ones.
-
-        Replaces: revise_estimate() in prototype.py.
-        """
+        """Append a NEW Estimate based on a DelayEvent. Never change old ones."""
         current = self.get_current_estimate(job_id)
-        self.estimates.append(Estimate(
+        new_estimate = Estimate(
             job_id,
             current.version + 1,
             current.target_days + delay_event.days_added,
             delay_event.logged_on_day,
             delay_event.description,
             delay_event.event_id,
-        ))
+        )
+        self.estimates.append(new_estimate)
+        self.estimates_by_job[job_id].append(new_estimate)
     # --- Delay events ------------------------------------------------------------
 
     def get_delays_for_job(self, job_id):
@@ -224,13 +230,10 @@ class Tracker:
 
         Replaces: get_delays_for_job() in prototype.py.
         """
-        return self.rows_for_job(self.delay_events, job_id)
+        return self.delays_by_job[job_id]
 
-    def log_delay(self, job_id, logged_on_day, category, description, days_added):
-        """Check the job and category, save a DelayEvent, then revise the estimate.
-
-        Replaces: log_delay() in prototype.py.
-        """
+    def log_delay(self, job_id, logged_on_day, category, description, days_added, event_id=None):
+        """Check the job and category, save a DelayEvent, then revise the estimate."""
         if self.find_job(job_id) is None:
             print(f"Error: job {job_id} not found")
             return
@@ -239,8 +242,11 @@ class Tracker:
             print(f"Error: '{category}' is not a valid category. Use one of: {self.categories}")
             return
 
+        if event_id is None:
+            event_id = len(self.delay_events) + 1
+
         event = DelayEvent(
-            len(self.delay_events) + 1,
+            event_id,
             job_id,
             category,
             description,
@@ -248,9 +254,11 @@ class Tracker:
             days_added,
         )
         self.delay_events.append(event)
+        self.delays_by_job[job_id].append(event)
         self.revise_estimate(job_id, event)
 
-        print(f"Job {job_id}, day {logged_on_day}: {category} (+{days_added} days) - {description}")
+        if not self.quiet:
+            print(f"Job {job_id}, day {logged_on_day}: {category} (+{days_added} days) - {description}")
 
     # --- Reports -----------------------------------------------------------------
 
