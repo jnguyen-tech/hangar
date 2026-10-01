@@ -18,6 +18,7 @@ One rule across every phase: be able to explain every line out loud. Scholar's D
 - [x] Replied to the mentor about the dataset
 - [x] Put the project on GitHub, with the dataset excluded ([jnguyen-tech/maintenance-delay-tracker](https://github.com/jnguyen-tech/maintenance-delay-tracker))
 - [ ] Share the GitHub link and `schema.sql` with the mentor for feedback
+- [ ] Turn on two-factor authentication for the GitHub account (Settings, then Password and authentication). Until the app has its own logins, the GitHub login is what protects the project
 - [x] Met with the mentor about the roadmap. He recommended the login system (admin, employee, manager) and a web interface: plain JavaScript first, then React, then animations.
 - [x] Confirmed with the mentor how the dataset can be described publicly
 - [ ] Mentor's email on data cleaning: agree on cleaning scope
@@ -86,7 +87,10 @@ Move the data from in-memory lists into a real database file, using Python's bui
 - [ ] Learn the basics: primary keys, foreign keys, `INSERT`, `SELECT`, `WHERE`, `GROUP BY`
 - [x] Draft the schema (`schema.sql`), including a table for each scenario's delay categories — review it with the mentor
 - [ ] Add a `users` table, and a `logged_by` column on delays and estimates so every entry records who made it (needed for Phase 6)
+- [ ] Add `*.db` to `.gitignore` before creating the database, so `tracker.db` (and the mentor's data inside it) never gets committed
 - [ ] Write `db.py`: create the tables from `schema.sql`, then rewrite `create_job`, `log_delay`, `close_job`, and the reports to use SQL
+- [ ] In `db.py`, open every connection through one helper that runs `PRAGMA foreign_keys = ON` (SQLite forgets this setting with each new connection)
+- [ ] Use `?` placeholders for every value in every SQL query, never f-strings, so text someone types can't run as SQL (SQL injection)
 - [ ] Load the cleaned data into the database
 - [ ] Confirm the database blocks edits and deletes to history (the append-only triggers)
 
@@ -109,7 +113,10 @@ What each role can do:
 The last row is the point: not even an admin can rewrite the record. Roles decide who can *add* to the history, and every addition is stamped with who made it.
 
 - [ ] `users` table: username, hashed password, role, and an active flag (accounts are deactivated, never deleted, so old entries still show who made them)
-- [ ] Never store plain passwords: hash them with a salt using Python's built-in `hashlib`
+- [ ] Never store plain passwords: hash them with a salt using Python's built-in `hashlib` (`hashlib.pbkdf2_hmac`, a deliberately slow hash, with a random salt from `secrets.token_bytes(16)`)
+- [ ] Compare hashes with `hmac.compare_digest`, not `==`
+- [ ] Give the same "wrong username or password" message either way, so nobody can find out which usernames exist
+- [ ] Create the first admin account by typing its password when the program asks (`getpass`), never by writing a password in the code
 - [ ] `login(username, password)`: returns the user if the password matches, or `None` if not
 - [ ] Permissions as a dictionary of role → allowed actions, plus a `can(user, action)` check at the top of every action
 - [ ] Stamp every delay and estimate with `logged_by`
@@ -134,6 +141,8 @@ Recommended by the mentor, in three steps. Each step works on its own before the
 - [ ] Reports page: the on-time comparison and slip by cause (manager and admin)
 - [ ] Account management page (admin)
 - [ ] Show only the buttons each role can use, but still check permissions in Python (hiding a button isn't security)
+- [ ] Read Flask's `SECRET_KEY` (it signs the login cookie) from an environment variable, never write it in the code
+- [ ] Log-out button that clears the login
 
 **Step B — Rebuild the pages in React.** React is a JavaScript library for building pages out of reusable pieces called components (for example, one `JobCard` component used for every job in the list). It's what most companies use, so it's a strong resume skill. Start only once Step A works, so there's a working version to compare against, the same way Phase 2 was checked against Phase 1.
 
@@ -154,7 +163,7 @@ The poster uses the Phase 4 results, described the way the mentor approved. If t
 - [ ] Abstract (150–250 words), framed as tool + case study: question, why it matters, what was built, findings, implications
 - [ ] Rough poster draft to the mentor
 - [ ] Final poster (42" × 36", PowerPoint exported to PDF) using the Technical category sections: overview, goal, design process, technology, results, reflection
-- [ ] Practice a 1–2 minute pitch and likely questions (for example: "Why not just use a spreadsheet?", "How would this connect to the Air Force's real systems?", "What else could this tool track?", "What if a worker's delay estimate is wrong?", and "Why can't an admin edit the history?")
+- [ ] Practice a 1–2 minute pitch and likely questions (for example: "Why not just use a spreadsheet?", "How would this connect to the Air Force's real systems?", "What else could this tool track?", "What if a worker's delay estimate is wrong?", "Why can't an admin edit the history?", and "How are passwords and data kept safe?")
 
 ## Phase 9 — After the tracker is finished
 
@@ -170,5 +179,6 @@ The poster uses the Phase 4 results, described the way the mentor approved. If t
 - [ ] Work type: add a work-type field to jobs (for example scheduled overhaul, modification, or emergency) and report slip by work type, like real maintenance systems do. Needs data that includes work types.
 - [ ] Estimate accuracy: record how long each delay actually took once fixed, and report how far off workers' estimates run for each category (for example, "discovered-work estimates run 40% low")
 - [ ] Public demo deployment
+  - [ ] Ask the mentor before putting their dataset online; otherwise demo with the case-study data only
 - [ ] Short walkthrough video
 - [ ] Resume and LinkedIn write-up; use the project when applying to 76 SMXG, depot-IT contractor, and aviation maintenance software roles
