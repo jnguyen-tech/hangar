@@ -1,0 +1,16 @@
+# The mentor's dataset stays off GitHub.
+# It isn't mine to publish, and the raw files are large.
+# See "Getting the data" in README.md.
+data/
+
+# Python's cache files (made automatically when a file is imported)
+__pycache__/
+*.pyc
+
+# Editor and system files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Private notes about the dataset (see README "Getting the data")
+DATA_GUIDE.md

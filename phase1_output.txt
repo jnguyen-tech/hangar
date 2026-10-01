@@ -1,0 +1,67 @@
+CASE STUDY: Depot maintenance delays, Oklahoma City ALC (Tinker AFB)
+Synthetic data modeled on the problems described in GAO-26-107890
+
+--- Opening jobs ---
+Created job 1 for B-52H, planned for 120 days
+Created job 2 for B-1B, planned for 90 days
+Created job 3 for KC-135, planned for 100 days
+
+--- Logging delays ---
+Job 1, day 20: discovered_work (+15 days) - Corrosion found on wing spar
+Job 1, day 45: parts (+10 days) - Waiting on replacement actuator
+Job 2, day 30: discovered_work (+20 days) - Cracked bulkhead found during inspection
+Job 2, day 50: staffing (+5 days) - Sheet metal crew shortage
+Error: 'bad_category' is not a valid category. Use one of: ['discovered_work', 'parts', 'staffing', 'other']
+
+--- Closing jobs ---
+Closed job 1 after 145 days
+Closed job 2 after 118 days
+Closed job 3 after 98 days
+
+=== Job 1: B-52H (closed) ===
+Original target: 120 days
+Current target:  145 days
+Slip:            25 days (20.8% over the original plan)
+Estimate history:
+  v1: 120 days - original plan
+  v2: 135 days - Corrosion found on wing spar
+  v3: 145 days - Waiting on replacement actuator
+Slip by cause:
+  discovered_work: 15 days
+  parts: 10 days
+Actually finished in 145 days
+
+=== Job 2: B-1B (closed) ===
+Original target: 90 days
+Current target:  115 days
+Slip:            25 days (27.8% over the original plan)
+Estimate history:
+  v1: 90 days - original plan
+  v2: 110 days - Cracked bulkhead found during inspection
+  v3: 115 days - Sheet metal crew shortage
+Slip by cause:
+  discovered_work: 20 days
+  staffing: 5 days
+Actually finished in 118 days
+
+=== Job 3: KC-135 (closed) ===
+Original target: 100 days
+Current target:  100 days
+Slip:            0 days (0.0% over the original plan)
+Estimate history:
+  v1: 100 days - original plan
+Slip by cause:
+  none - no delays logged
+Actually finished in 98 days
+
+=========== SUMMARY: ALL JOBS ===========
+Total slip across all jobs: 50 days
+  discovered_work: 35 days (70.0%)
+  parts: 10 days (20.0%)
+  staffing: 5 days (10.0%)
+  other: 0 days (0.0%)
+
+Closed jobs: 3
+  On time measured against REVISED targets:  2 of 3
+  On time measured against ORIGINAL targets: 1 of 3
+  Jobs that only look on time because the target moved: 1
