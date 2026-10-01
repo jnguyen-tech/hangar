@@ -51,6 +51,63 @@ def clean_status(text):
         return "closed"
     return "open"
 
+# Every raw spelling of a delay category (in capitals), and the standard name it means.
+CATEGORY_MAP = {
+    "DISCOVERED_WORK": "discovered_work",
+    "D/W": "discovered_work",
+    "DISC WORK": "discovered_work",
+    "UNPLANNED": "discovered_work",
+    "PARTS": "parts",
+    "PART": "parts",
+    "PRTS": "parts",
+    "SUPPLY": "parts",
+    "ENGINEERING_APPROVAL": "engineering_approval",
+    "ENGINEERING": "engineering_approval",
+    "ENG APPR": "engineering_approval",
+    "TECH DISP": "engineering_approval",
+    "STAFFING": "staffing",
+    "STAFF": "staffing",
+    "MANPOWER": "staffing",
+    "OTHER": "other",
+    "MISC": "other",
+}
+
+
+def clean_category(text):
+    """Turn any spelling of a delay category into one of the 5 standard names, or None if unknown."""
+    text = text.strip().upper()
+    if text in CATEGORY_MAP:
+        return CATEGORY_MAP[text]
+    return None
+
+
+def clean_days(text):
+    """Turn days_added into a whole number, or None if it's missing or a placeholder value."""
+    text = text.strip().lower()
+    if text == "" or text == "null":
+        return None
+    text = text.replace("days", "").replace("day", "").strip()
+    days = int(text)
+    if days < 0 or days == 999:
+        return None
+    return days
+
+
+def load_delay_events():
+    """Read all 3 delay files and return a dictionary of unique events, keyed by event_id."""
+    events = {}
+    duplicates = 0
+    for file_name in ["delay_events_legacy.csv", "delay_events_2024.csv", "delay_events_current.csv"]:
+        file = open(os.path.join(RAW_FOLDER, file_name), encoding="utf-8")
+        for row in csv.DictReader(file):
+            if row["event_id"] in events:
+                duplicates += 1
+            else:
+                events[row["event_id"]] = row
+        file.close()
+    print("Duplicate delay rows skipped:", duplicates)
+    return events
+
 if __name__ == "__main__":
     # Test 1: one example of each format. All four should print as 2024-07-29.
     print(parse_date("2024-07-29"))
@@ -102,3 +159,18 @@ if __name__ == "__main__":
                 missing += 1
         file.close()
     print("Delay rows whose job can't be found:", missing)
+
+    # Test 5: load the delay events, then clean their categories and days.
+    events = load_delay_events()
+    print("Unique delay events:", len(events))
+    category_counts = {}
+    missing_days = 0
+    for event in events.values():
+        category = clean_category(event["delay_category"])
+        if category not in category_counts:
+            category_counts[category] = 0
+        category_counts[category] += 1
+        if clean_days(event["days_added"]) is None:
+            missing_days += 1
+    print("Categories:", category_counts)
+    print("Delays with missing or placeholder days:", missing_days)
