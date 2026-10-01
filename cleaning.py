@@ -108,6 +108,51 @@ def load_delay_events():
     print("Duplicate delay rows skipped:", duplicates)
     return events
 
+def clean_version(text):
+    """Turn a version like "v2" or "2" into the whole number 2."""
+    text = text.strip().lower().replace("v", "")
+    return int(text)
+
+
+def load_estimates():
+    """Read the estimate history and return a dictionary of unique estimates, keyed by estimate_id."""
+    estimates = {}
+    duplicates = 0
+    file = open(os.path.join(RAW_FOLDER, "target_estimate_history.csv"), encoding="utf-8")
+    for row in csv.DictReader(file):
+        if row["estimate_id"] in estimates:
+            duplicates += 1
+        else:
+            estimates[row["estimate_id"]] = row
+    file.close()
+    print("Duplicate estimate rows skipped:", duplicates)
+    return estimates
+
+
+def days_moved_by_each_delay(estimates):
+    """For every revision caused by a delay, work out how many days it moved the target date.
+
+    Returns a dictionary: event_id -> days the target moved.
+    """
+    # First, look up any job's target date by (job_id, version).
+    targets = {}
+    for estimate in estimates.values():
+        key = (clean_job_id(estimate["job_id"]), clean_version(estimate["version"]))
+        targets[key] = parse_date(estimate["target_completion_date"])
+
+    # Then, for each revision a delay caused, subtract the previous version's target.
+    days_moved = {}
+    for estimate in estimates.values():
+        event_id = estimate["trigger_event_id"].strip()
+        if event_id == "":
+            continue
+        job_id = clean_job_id(estimate["job_id"])
+        version = clean_version(estimate["version"])
+        new_target = targets[(job_id, version)]
+        old_target = targets[(job_id, version - 1)]
+        days_moved[event_id] = (new_target - old_target).days
+    return days_moved
+
 if __name__ == "__main__":
     # Test 1: one example of each format. All four should print as 2024-07-29.
     print(parse_date("2024-07-29"))
@@ -174,3 +219,24 @@ if __name__ == "__main__":
             missing_days += 1
     print("Categories:", category_counts)
     print("Delays with missing or placeholder days:", missing_days)
+
+    # Test 6: check that days_added always equals how far the target moved,
+    # then use that to fill in the missing ones.
+    estimates = load_estimates()
+    print("Unique estimates:", len(estimates))
+    days_moved = days_moved_by_each_delay(estimates)
+    matches = 0
+    mismatches = 0
+    recovered = 0
+    for event_id, event in events.items():
+        days = clean_days(event["days_added"])
+        if days is None:
+            if event_id in days_moved:
+                recovered += 1
+        elif days == days_moved[event_id]:
+            matches += 1
+        else:
+            mismatches += 1
+    print("Valid days that match the estimate history:", matches)
+    print("Valid days that don't match:", mismatches)
+    print("Missing days that can be recovered:", recovered)
