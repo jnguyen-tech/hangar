@@ -75,9 +75,9 @@ The dataset from the mentor (50,000 jobs, about 119,000 delays, about 182,000 es
 
 Turn the results into something that reads well on a poster. This comes before the database on purpose: the poster needs results first, and the in-memory tracker can already produce them.
 
-- [ ] Run the summary report on the cleaned dataset
-- [ ] Chart: how many jobs look on time against the original target, the last regular target, and after post-completion revisions
-- [ ] Chart: total slip by cause
+- [x] Run the summary report on the cleaned dataset
+- [x] Chart: how many jobs look on time against the original target, the last regular target, and after post-completion revisions (`charts.py`)
+- [x] Chart: total slip by cause (`charts.py`)
 - [ ] Chart: one job's timeline (for example `JOB-0000058`), showing how each revision moved the target
 - [ ] Export the charts for the poster
 
@@ -155,6 +155,8 @@ The poster uses the Phase 4 results, described the way the mentor approved. If t
 
 - [ ] Abstract (150–250 words), framed as tool + case study: question, why it matters, what was built, findings, implications
 - [ ] Rough poster draft to the mentor
+- [ ] Poster design: an Air Force and aviation look that draws people in. Deep navy background, Air Force-style blue for headings and the key chart bars, silver gray, and one gold accent for the headline numbers. Ideas: runway-stripe dividers, a flight-path line linking the sections, a faint blueprint grid, stencil-style section labels, and the job timeline drawn as a flight plan. No official logos or seals, and nothing that brands the poster as a specific base.
+- [ ] Recolor the charts to match the poster (the colors are set once at the top of `charts.py`)
 - [ ] Final poster (42" × 36", PowerPoint exported to PDF) using the Technical category sections: overview, goal, design process, technology, results, reflection
 - [ ] Practice a 1–2 minute pitch and likely questions (for example: "Why not just use a spreadsheet?", "How would this connect to the Air Force's real systems?", "What else could this tool track?", "What if a worker's delay estimate is wrong?", and "Why can't an admin edit the history?")
 
