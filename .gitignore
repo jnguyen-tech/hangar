@@ -14,3 +14,9 @@ Thumbs.db
 
 # Private notes about the dataset (see README "Getting the data")
 DATA_GUIDE.md
+
+# Charts show results from the dataset. Kept private until the mentor approves what can be shown.
+charts/
+
+# Files downloaded from Claude (may include charts with results)
+Claude outputs/
