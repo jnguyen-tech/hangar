@@ -49,25 +49,27 @@ Rewrite `prototype.py` using classes (`Job`, `Estimate`, `DelayEvent`, and a `Tr
 
 (Step 7, switching the Navy case study to the classes, moved to Phase 9.)
 
-## Phase 3 — Clean and load the dataset (in progress)
+## Phase 3 — Clean and load the dataset (nearly done)
 
 The dataset from the mentor (50,000 jobs, about 119,000 delays, about 182,000 estimate versions) is messy on purpose, so this phase is about cleaning it. The issue list is kept in private notes alongside the data.
 
 - [x] Profile the data: what's in each file, how they connect, and what's wrong
 - [x] Put the original files in `data/raw/` and never edit them by hand
 - [x] Learn to read CSV files in Python with the built-in `csv` module (`read_jobs.py`: all 50,000 jobs read)
-- [ ] Write the cleaning code in `cleaning.py`, working through the issue list:
+- [x] Write the cleaning code in `cleaning.py`, working through the issue list:
   - [x] Step 2: dates in all 4 formats (200,000 dates parsed)
   - [x] Step 3: job IDs, depot names, and statuses (every delay row now finds its job)
-  - [ ] Step 4: delay events — remove duplicates, map the 18 category spellings to 5, clean `days_added`
-  - [ ] Recover the 1,187 missing or placeholder `days_added` values from the estimate history
-  - [ ] Clean the estimate history (duplicates, `v1` versions, post-completion revisions)
-  - [ ] Logic problems (non-closed jobs with completion dates, same-day jobs)
-- [ ] Convert dates into calendar-day counts from each job's open date (all durations are calendar days)
+  - [x] Step 4: delay events — remove duplicates, map the 18 category spellings to 5, clean `days_added`
+  - [x] Step 5: recover the 1,187 missing or placeholder `days_added` values from the estimate history (method checked first on 117,545 known values: 0 mismatches)
+  - [x] Step 6: build the clean delay list (descriptions standardized to 13)
+  - [x] Step 7: clean the estimate history (duplicates, `v1` versions, post-completion revisions kept and labeled)
+  - [x] Step 8: clean the jobs; flag logic problems instead of deleting them (2,707 status conflicts, 8 same-day jobs); cross-check jobs against the estimate history
+- [x] Step 9: convert dates into calendar-day counts from each job's open date (all durations are calendar days)
+- [x] Step 9: write the cleaned files to `data/clean/`
+- [x] Speed up the `Tracker` with lookup dictionaries so it can handle 50,000 jobs (`compare_outputs.py` still says MATCH; loading went from an estimated 15 minutes to about 3 seconds)
+- [x] Load the cleaned data into the tracker (`load_data.py`) and run the reports. The Tracker rebuilt the dataset's full estimate history from the original plans and the delays alone: all 182,403 estimates match.
 - [ ] Show real dates in the reports: give each `Job` an `open_date`, add a helper that turns a day number into a date (open date + days, using Python's `datetime` module), and print both, like `Apr 2, 2024 (120 days)`. Day numbers stay underneath for the math. This changes the output on purpose, so save a new answer key afterward.
-- [ ] Write the cleaned files to `data/clean/`
-- [ ] Load the cleaned data into the tracker and run the reports
-- [ ] Keep post-completion revisions in the history, but judge "on time" against the original and last regular targets
+- [x] Keep post-completion revisions in the history, marked, and report on-time three ways: against the original target, the last target set before finishing, and the final record
 
 ## Phase 4 — Results and visuals
 

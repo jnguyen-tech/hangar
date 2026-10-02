@@ -67,6 +67,7 @@ class Estimate:
         self.created_on_day = created_on_day
         self.reason = reason
         self.delay_event_id = delay_event_id
+        self.after_completion = False
 
 
 class DelayEvent:
@@ -185,7 +186,8 @@ class Tracker:
         
         job.status = "closed"
         job.actual_days = actual_days
-        print(f"Closed job {job_id} after {actual_days} days")
+        if not self.quiet:
+            print(f"Closed job {job_id} after {actual_days} days")
 
     # --- Estimates (append-only) ----------------------------------------------
 
@@ -210,6 +212,29 @@ class Tracker:
         """
         return self.get_estimates_for_job(job_id)[-1]
 
+    def get_last_regular_estimate(self, job_id):
+        """The most recent Estimate made BEFORE the job finished (skips post-completion revisions)."""
+        last = None
+        for estimate in self.get_estimates_for_job(job_id):
+            if not estimate.after_completion:
+                last = estimate
+        return last
+
+    def record_post_completion_revision(self, job_id, target_days, created_on_day):
+        """Append a revision made AFTER the job finished. It's kept in the history, but marked."""
+        current = self.get_current_estimate(job_id)
+        estimate = Estimate(
+            job_id,
+            current.version + 1,
+            target_days,
+            created_on_day,
+            "post-completion revision (no delay logged)",
+            None,
+        )
+        estimate.after_completion = True
+        self.estimates.append(estimate)
+        self.estimates_by_job[job_id].append(estimate)
+    
     def revise_estimate(self, job_id, delay_event):
         """Append a NEW Estimate based on a DelayEvent. Never change old ones."""
         current = self.get_current_estimate(job_id)
@@ -330,7 +355,7 @@ class Tracker:
         on_time_vs_revised = 0
         for job in closed_jobs:
             original = self.get_original_estimate(job.job_id).target_days
-            revised = self.get_current_estimate(job.job_id).target_days
+            revised = self.get_last_regular_estimate(job.job_id).target_days
             if job.actual_days <= original:
                 on_time_vs_original += 1
             if job.actual_days <= revised:
@@ -343,6 +368,31 @@ class Tracker:
         print(f"  On time measured against ORIGINAL targets: {on_time_vs_original} of {len(closed_jobs)}")
         print(f"  Jobs that only look on time because the target moved: {hidden}")
 
+    def print_three_way_comparison(self):
+        """Print on-time counts against the original target, the last regular target,
+        and the final record (after post-completion revisions)."""
+        closed_jobs = 0
+        vs_original = 0
+        vs_regular = 0
+        vs_final = 0
+        for job in self.jobs:
+            if job.status != "closed":
+                continue
+            closed_jobs += 1
+            if job.actual_days <= self.get_original_estimate(job.job_id).target_days:
+                vs_original += 1
+            if job.actual_days <= self.get_last_regular_estimate(job.job_id).target_days:
+                vs_regular += 1
+            if job.actual_days <= self.get_current_estimate(job.job_id).target_days:
+                vs_final += 1
+
+        print(f"\nClosed jobs: {closed_jobs}")
+        print(f"  On time vs ORIGINAL target:                     {vs_original} ({percent(vs_original, closed_jobs)}%)")
+        print(f"  On time vs LAST target set before finishing:    {vs_regular} ({percent(vs_regular, closed_jobs)}%)")
+        print(f"  On time vs FINAL record (after-the-fact edits): {vs_final} ({percent(vs_final, closed_jobs)}%)")
+        print(f"  Made to look on time by revisions during the job: {vs_regular - vs_original}")
+        print(f"  Made to look on time by revisions AFTER the job:  {vs_final - vs_regular}")
+    
     def print_summary_report(self):
         """Print the summary header, then the two reports above.
 
