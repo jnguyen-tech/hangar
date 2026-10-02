@@ -90,7 +90,52 @@ def chart_on_time(tracker):
     )
     save_chart(fig, "on_time_three_ways.png")
 
+def chart_slip_by_cause(tracker):
+    """Chart 2: which causes added the most delay days."""
+    totals = tracker.total_days_by_category(tracker.delay_events)
+
+    # Put the causes in order, biggest first. Tuples sort by their first value.
+    pairs = []
+    for category in tracker.categories:
+        pairs.append((totals[category], category))
+    pairs.sort(reverse=True)
+
+    total_days = 0
+    for days, category in pairs:
+        total_days += days
+
+    labels = []
+    percents = []
+    for days, category in pairs:
+        labels.append(category.replace("_", " ").capitalize())
+        percents.append(round(days / total_days * 100, 1))
+
+    colors = [BLUE]
+    for i in range(len(pairs) - 1):
+        colors.append(GRAY)
+
+    fig, ax = plt.subplots(figsize=(9, 4.6))
+    ax.barh(labels, percents, color=colors, height=0.5)
+    ax.invert_yaxis()
+
+    for i in range(len(pairs)):
+        ax.text(percents[i] + 0.8, i - 0.1, f"{percents[i]}%", va="center",
+                fontsize=14, fontweight="bold", color=TEXT)
+        ax.text(percents[i] + 0.8, i + 0.17, f"{pairs[i][0]:,} days", va="center",
+                fontsize=10, color=SOFT_TEXT)
+
+    ax.set_xlim(0, 60)
+    ax.set_xticks([0, 10, 20, 30, 40, 50, 60])
+    ax.set_xticklabels(["0%", "10%", "20%", "30%", "40%", "50%", "60%"])
+    style_chart(
+        fig, ax,
+        "Work discovered mid-job is the biggest cause of delay",
+        f"Share of {total_days:,} total delay days across all jobs, by cause",
+    )
+    save_chart(fig, "slip_by_cause.png")
 
 if __name__ == "__main__":
     tracker = load_tracker()
     chart_on_time(tracker)
+
+    chart_slip_by_cause(tracker)
