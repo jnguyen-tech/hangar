@@ -4,7 +4,7 @@ John Nguyen, Oklahoma City Community College
 
 A general-purpose tool for tracking maintenance delays honestly: it keeps the original plan on record instead of overwriting it. Its main case study, built from a public GAO report, is depot maintenance delays at Tinker AFB. A second case study on Navy ship maintenance shows the same tool works elsewhere.
 
-> **Status:** Demo / portfolio project. It runs entirely on synthetic data and is not connected to, and does not represent, any real Air Force, Navy, or other maintenance system or records.
+> **Status:** Demo / portfolio project. It is not connected to any Air Force, Navy, or other maintenance system, and nothing in this repository is official data or an official measure of performance. The example jobs in the case study files are made up.
 
 ## The idea
 
@@ -128,8 +128,9 @@ Each design decision below traces back to the problems in the case studies.
 
 ## Tech stack
 
-- Python 3, standard library only for now — no installs needed
-- A 50,000-job practice dataset (synthetic, provided by the faculty mentor), cleaned with Python's built-in `csv` and `datetime` modules so the case study can be demoed at scale (Phase 3; see `DATA_GUIDE.md`)
+- Python 3. The tool and the data cleaning use only Python's standard library, so there's nothing to install for them.
+- matplotlib for the charts (`python -m pip install matplotlib`)
+- A 50,000-job maintenance dataset provided by the faculty mentor, cleaned with Python's built-in `csv` and `datetime` modules so the tool can be tested at scale (Phase 3)
 - SQLite through Python's built-in `sqlite3` module for storage (Phase 5)
 - Password hashing with Python's built-in `hashlib` for the login (Phase 6)
 - Plain HTML, CSS, and JavaScript for the web interface, connected to Python with Flask, then React, with CSS and Framer Motion or GSAP for animations (Phase 7)
@@ -148,25 +149,27 @@ maintenance-delay-tracker/
 ├── maintenance_tracker.py  # the tool rewritten with classes (Phase 2); the Tinker case study runs on this
 ├── schema.sql              # Phase 5 design: the SQLite tables, with append-only rules
 │
-│   Cleaning the practice dataset (Phase 3, in progress)
+│   Cleaning and loading the mentor's dataset (Phase 3), and charts (Phase 4)
 ├── read_jobs.py            # first look at the jobs file: prints 5 rows and the total
-├── cleaning.py             # cleaning functions (dates, IDs, depots, statuses, delays), with tests
+├── cleaning.py             # cleans the raw files and writes them to data/clean/, with a test for each step
+├── load_data.py            # loads the clean data into the Tracker, checks it, and prints the reports
+├── charts.py               # draws the result charts and saves them to charts/
 │
 │   Study guides and checking tools
 ├── PROTOTYPE_GUIDE.md      # plain-language walkthrough of the Phase 1 code
 ├── PHASE2_GUIDE.md         # classes, __init__, self, imports, and the Phase 2 steps
-├── DATA_GUIDE.md           # the mentor's practice dataset: files, links, and cleaning checklist
 ├── compare_outputs.py      # confirms Phase 2 output matches Phase 1
 ├── phase1_output.txt       # the Phase 1 output, used as the answer key
 │
-└── data/                   # not on GitHub (see below)
-    ├── raw/                # the dataset's original files, never edited
-    └── clean/              # cleaned files written by the code
+├── data/                   # not on GitHub (see below)
+│   ├── raw/                # the dataset's original files, never edited
+│   └── clean/              # cleaned files written by the code
+└── charts/                 # chart images, not on GitHub
 ```
 
 ### Getting the data
 
-The practice dataset isn't included in this repository. It was shared by the faculty mentor for coursework, so it isn't mine to publish. The case studies and the Phase 2 check (`compare_outputs.py`) don't need it.
+The dataset and my notes on it aren't included in this repository. They were shared by the faculty mentor for this project and aren't mine to publish. The case studies and the Phase 2 check (`compare_outputs.py`) don't need them.
 
 To run the cleaning code, put the dataset's files in `data/raw/`:
 
@@ -181,11 +184,19 @@ data/raw/
 └── README.txt
 ```
 
-Then run `python cleaning.py`. `DATA_GUIDE.md` describes each file and the cleaning checklist.
+Then run these in order:
+
+```
+python cleaning.py
+python load_data.py
+python charts.py
+```
+
+`cleaning.py` writes the cleaned files to `data/clean/`, `load_data.py` loads them into the tracker and prints the reports, and `charts.py` saves the charts to `charts/`.
 
 ## Progress
 
-Phases 1 and 2 are complete: the plain-Python tool works, and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line. The current focus is the Tinker case study. Phase 3, cleaning the mentor's 50,000-job practice dataset, is underway in `cleaning.py`: dates in all four formats now parse, and job IDs, depot names, and statuses are standardized, with every delay row now matching its job. Next come the Tinker results and charts, the SQLite database, user accounts with roles, and a JavaScript web interface. See [ROADMAP.md](ROADMAP.md) for the full checklist.
+Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A 50,000-job maintenance dataset provided by the faculty mentor has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). Next come the Scholar's Day abstract and poster, then the SQLite database, user accounts with roles, and a web interface. See [ROADMAP.md](ROADMAP.md) for the full checklist.
 
 ## Presenting this project
 
