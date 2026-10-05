@@ -1,19 +1,6 @@
 # maintenance_tracker.py
 #
-# Phase 2: the same tool as prototype.py, rewritten with classes.
-# YOU write this one. prototype.py and PROTOTYPE_GUIDE.md are your spec:
-# every function in prototype.py becomes a method here that does the same job.
-#
-# Companion sheet: PHASE2_GUIDE.md explains classes, __init__, self, and
-# imports, has a Phase 1 -> Phase 2 translation cheat sheet, the expected
-# output for every test step, and a table of common error messages.
-#
-# How to use this file:
-#   * Every method has a docstring saying what it should do and which
-#     prototype.py function it replaces.
-#   * Replace each `pass` with real code.
-#   * Job.__init__ is already filled in, as an example of the pattern.
-#   * Build and test one step at a time (see the test steps at the bottom).
+# The maintenance delay tracker, written with classes.
 #
 # What changes from prototype.py:
 #   * Dictionaries become objects:   job["asset"]   ->  job.asset
@@ -26,9 +13,6 @@
 # like Job(1, "B-52H"). Its job is to set up the object's starting fields.
 
 
-from unicodedata import name
-
-
 def percent(part, whole):
     """Return part as a percentage of whole, rounded to 1 decimal place.
 
@@ -36,7 +20,7 @@ def percent(part, whole):
     it doesn't need to be inside a class.
     """
     if whole == 0:
-            return 0.0
+        return 0.0
     return round(part / whole * 100, 1)
 
 
@@ -90,8 +74,6 @@ class Tracker:
     """Holds one scenario's jobs, estimates, delays, and categories, plus every method that works on them."""
 
     def __init__(self):
-        # TODO: create four fields:
-        #   self.jobs, self.estimates, self.delay_events -> each an empty list
         #   self.categories -> ["discovered_work", "parts", "staffing", "other"]
         self.jobs = []
         self.estimates = []
@@ -181,8 +163,8 @@ class Tracker:
         """
         job = self.find_job(job_id)
         if job is None:
-                print(f"Error: job {job_id} not found")
-                return
+            print(f"Error: job {job_id} not found")
+            return
         
         job.status = "closed"
         job.actual_days = actual_days
@@ -292,7 +274,6 @@ class Tracker:
 
         Replaces: print_job_report() in prototype.py.
         """
-        """One job: original vs. current target, full history, and slip by cause."""
         job = self.find_job(job_id)
         if job is None:
             print(f"Error: job {job_id} not found")
@@ -411,7 +392,7 @@ class Tracker:
 # As you finish each step, remove the # from that step's test lines.
 
 if __name__ == "__main__":
-    print("maintenance_tracker.py: remove the # from each test step as you finish it.")
+    print("maintenance_tracker.py self-test")
 
     # Step 1 -- Job, Estimate, and DelayEvent __init__ methods
     job = Job(1, "B-52H")
