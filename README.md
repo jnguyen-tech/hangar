@@ -38,9 +38,9 @@ The tool addresses it in three ways:
 
 All durations are **calendar days**: every day counts, including weekends and holidays. Working days would make the same delays look smaller, and a completion date is a calendar date — the day the asset is back in service.
 
-## What's being built next
+## Login and roles, and what's next
 
-**User accounts with three roles.** Each person logs in as an employee, a manager, or an admin, and every delay and estimate is stamped with who entered it.
+**User accounts with three roles** (working from the command line; `python session.py` runs a demo). Each person logs in as an employee, a manager, or an admin, and every delay is stamped with who entered it. Passwords are never stored: only a salted hash is kept.
 
 | Action | Employee | Manager | Admin |
 |---|:-:|:-:|:-:|
@@ -155,6 +155,10 @@ maintenance-delay-tracker/
 ├── load_data.py            # loads the clean data into the Tracker, checks it, and prints the reports
 ├── charts.py               # draws the result charts and saves them to charts/
 │
+│   Login and roles (Phase 6)
+├── accounts.py             # user accounts, hashed passwords, login, and what each role may do
+├── session.py              # one logged-in user working with the tracker; checks permission before every action
+│
 │   Study guides and checking tools
 ├── PROTOTYPE_GUIDE.md      # plain-language walkthrough of the Phase 1 code
 ├── PHASE2_GUIDE.md         # classes, __init__, self, imports, and the Phase 2 steps
@@ -196,7 +200,7 @@ python charts.py
 
 ## Progress
 
-Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A 50,000-job maintenance dataset provided by the faculty mentor has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). Next come the Scholar's Day abstract and poster, then the SQLite database, user accounts with roles, and a web interface. See [ROADMAP.md](ROADMAP.md) for the full checklist.
+Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A 50,000-job maintenance dataset provided by the faculty mentor has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). The login system works from the command line: accounts with hashed passwords, three roles, a permission check before every action, and every delay stamped with who logged it (Phase 6). Next come the Scholar's Day abstract and poster, the SQLite database, and a web interface. See [ROADMAP.md](ROADMAP.md) for the full checklist.
 
 ## Presenting this project
 

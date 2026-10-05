@@ -110,12 +110,15 @@ What each role can do:
 
 The last row is the point: not even an admin can rewrite the record. Roles decide who can *add* to the history, and every addition is stamped with who made it.
 
-- [ ] `users` table: username, hashed password, role, and an active flag (accounts are deactivated, never deleted, so old entries still show who made them)
-- [ ] Never store plain passwords: hash them with a salt using Python's built-in `hashlib`
-- [ ] `login(username, password)`: returns the user if the password matches, or `None` if not
-- [ ] Permissions as a dictionary of role → allowed actions, plus a `can(user, action)` check at the top of every action
-- [ ] Stamp every delay and estimate with `logged_by`
-- [ ] Test each role from the command line (for example, an employee trying to close a job gets refused)
+- [x] `User` and `Accounts` classes in `accounts.py`: username, hashed password, role, and an active flag (accounts are deactivated, never deleted, so old entries still show who made them)
+- [ ] Save the accounts in a `users` table once the database exists (Phase 5)
+- [x] Never store plain passwords: hash them with a salt using Python's built-in `hashlib`
+- [x] `login(username, password)`: returns the user if the password matches, or `None` if not
+- [x] Permissions as a dictionary of role → allowed actions, plus a `can(user, action)` check
+- [x] `Session` class in `session.py`: one logged-in user working with the tracker. It checks permission before every action, then passes the request to the `Tracker`, which didn't need to learn anything about passwords or roles.
+- [x] Stamp every delay with `logged_by`
+- [ ] Only an admin, working through a `Session`, can create or deactivate accounts
+- [x] Test each role from the command line (for example, an employee trying to close a job gets refused)
 - [ ] Note for the poster: this is a demo login. Real Air Force systems use CAC cards and single sign-on, which this project doesn't attempt.
 
 ## Phase 7 — Web interface (JavaScript, then React, then animations)

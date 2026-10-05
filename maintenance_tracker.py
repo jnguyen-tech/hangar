@@ -64,8 +64,7 @@ class DelayEvent:
         self.description = description
         self.logged_on_day = logged_on_day
         self.days_added = days_added
-
-
+        self.logged_by = None
 # ===========================================================================
 # The Tracker (replaces the global lists and all the functions)
 # ===========================================================================
@@ -239,7 +238,7 @@ class Tracker:
         """
         return self.delays_by_job[job_id]
 
-    def log_delay(self, job_id, logged_on_day, category, description, days_added, event_id=None):
+    def log_delay(self, job_id, logged_on_day, category, description, days_added, event_id=None, logged_by=None):
         """Check the job and category, save a DelayEvent, then revise the estimate."""
         if self.find_job(job_id) is None:
             print(f"Error: job {job_id} not found")
@@ -260,6 +259,7 @@ class Tracker:
             logged_on_day,
             days_added,
         )
+        event.logged_by = logged_by
         self.delay_events.append(event)
         self.delays_by_job[job_id].append(event)
         self.revise_estimate(job_id, event)
@@ -268,7 +268,16 @@ class Tracker:
             print(f"Job {job_id}, day {logged_on_day}: {category} (+{days_added} days) - {description}")
 
     # --- Reports -----------------------------------------------------------------
+    
+    def print_delay_log(self, job_id):
+        """Print every delay on a job, with who logged it."""
+        if self.find_job(job_id) is None:
+            print(f"Error: job {job_id} not found")
+            return
 
+        print(f"\nDelay log for job {job_id}:")
+        for event in self.get_delays_for_job(job_id):
+            print(f"  Day {event.logged_on_day}: {event.category} (+{event.days_added} days) - {event.description} [logged by {event.logged_by}]")
     def print_job_report(self, job_id):
         """Print one job's original vs. current target, history, and slip by cause.
 
