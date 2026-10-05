@@ -10,7 +10,8 @@ PROJECT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 CHARTS_FOLDER = os.path.join(PROJECT_FOLDER, "charts")
 
 # Colors used in every chart, so they all match.
-BLUE = "#2a78d6"        # the bar the chart is about
+BLUE = "#1f4e9e"        # the bar the chart is about
+GOLD = "#e0a100"        # changes made after the job finished
 GRAY = "#c3c2b7"        # bars shown for comparison
 TEXT = "#0b0b0b"        # titles and numbers
 SOFT_TEXT = "#52514e"   # subtitles and axis labels
@@ -134,8 +135,69 @@ def chart_slip_by_cause(tracker):
     )
     save_chart(fig, "slip_by_cause.png")
 
+def chart_job_timeline(tracker, job_id):
+    """Chart 3: one job's target date, version by version."""
+    job = tracker.find_job(job_id)
+    estimates = tracker.get_estimates_for_job(job_id)
+    original_days = estimates[0].target_days
+    days_late = job.actual_days - original_days
+
+    labels = []
+    targets = []
+    colors = []
+    text_colors = []
+    for estimate in estimates:
+        if estimate.version == 1:
+            labels.append("v1  Original plan")
+            colors.append(BLUE)
+            text_colors.append("white")
+        elif estimate.after_completion:
+            labels.append(f"v{estimate.version}  Changed after\nthe job finished")
+            colors.append(GOLD)
+            text_colors.append(TEXT)
+        else:
+            labels.append(f"v{estimate.version}  {estimate.reason.capitalize()}")
+            colors.append(GRAY)
+            text_colors.append(TEXT)
+        targets.append(estimate.target_days)
+
+    fig, ax = plt.subplots(figsize=(10, 4.8))
+    ax.barh(labels, targets, color=colors, height=0.5)
+    ax.invert_yaxis()
+
+    # Write each target inside the end of its bar, with how far it moved.
+    for i in range(len(targets)):
+        text = f"{targets[i]} days"
+        if i > 0:
+            text = f"+{targets[i] - targets[i - 1]}  =  " + text
+        ax.text(targets[i] - 3, i, text, va="center", ha="right",
+                fontsize=11, color=text_colors[i])
+
+    # A line for the day the job actually finished.
+    ax.axvline(job.actual_days, color=TEXT, linewidth=1.5)
+    ax.text(job.actual_days + 3, -0.55, f"Finished: day {job.actual_days}",
+            fontsize=11, fontweight="bold", color=TEXT)
+
+    # An arrow showing the gap between the original plan and the real finish.
+    ax.annotate("", xy=(job.actual_days, 0), xytext=(original_days, 0),
+                arrowprops={"arrowstyle": "<->", "color": TEXT})
+    ax.text((original_days + job.actual_days) / 2, -0.12, f"{days_late} days late",
+            ha="center", fontsize=11, fontweight="bold", color=TEXT)
+
+    ax.set_xlim(0, 270)
+    ax.set_ylim(len(targets) - 0.5, -0.8)
+    ax.set_xlabel("Days after the job opened", fontsize=11, color=SOFT_TEXT)
+    style_chart(
+        fig, ax,
+        f"This job finished {days_late} days late, but its record says on time",
+        f"Job {job_id}: each bar is one version of the target finish date",
+    )
+    save_chart(fig, "job_timeline.png")
+
 if __name__ == "__main__":
     tracker = load_tracker()
     chart_on_time(tracker)
 
     chart_slip_by_cause(tracker)
+
+    chart_job_timeline(tracker, "JOB-0000058")

@@ -78,8 +78,8 @@ Turn the results into something that reads well on a poster. This comes before t
 - [x] Run the summary report on the cleaned dataset
 - [x] Chart: how many jobs look on time against the original target, the last regular target, and after post-completion revisions (`charts.py`)
 - [x] Chart: total slip by cause (`charts.py`)
-- [ ] Chart: one job's timeline (for example `JOB-0000058`), showing how each revision moved the target
-- [ ] Export the charts for the poster
+- [x] Chart: one job's timeline (for example `JOB-0000058`), showing how each revision moved the target
+- [x] Export the charts for the poster (saved at 300 dpi in `charts/`, kept private)
 
 ## Phase 5 — Real database (SQLite)
 
