@@ -33,7 +33,7 @@ header p {
 }
 
 main {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 32px auto;
     padding: 24px 32px;
     background: var(--white);
@@ -42,4 +42,43 @@ main {
 
 h2 {
     color: var(--blue);
+}
+
+
+/* The navigation links in the header */
+nav {
+    margin-top: 16px;
+}
+
+nav a {
+    color: var(--white);
+    text-decoration: none;
+    margin-right: 24px;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: var(--gold);
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: var(--navy);
+    color: var(--white);
+    text-align: left;
+    padding: 10px 12px;
+}
+
+td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #D8DDE5;
+}
+
+tr:hover td {
+    background: var(--light);
 }

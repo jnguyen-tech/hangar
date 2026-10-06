@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jobs - Maintenance Delay Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>Maintenance Delay Tracker</h1>
+        <p>Keeps the original plan on record, so a job can't look on time just because its deadline moved.</p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/jobs">Jobs</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Jobs</h2>
+        <p>Showing the first {{ rows|length }} of {{ total }} jobs.</p>
+
+        <table>
+            <tr>
+                <th>Job</th>
+                <th>Asset</th>
+                <th>Status</th>
+                <th>Original target</th>
+                <th>Finished in</th>
+                <th>Days late</th>
+            </tr>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.job_id }}</td>
+                <td>{{ row.asset }}</td>
+                <td>{{ row.status }}</td>
+                <td>{{ row.original_days }} days</td>
+                <td>{{ row.actual_days }} days</td>
+                <td>{{ row.days_late }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </main>
+</body>
+</html>
