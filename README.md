@@ -57,7 +57,7 @@ No role can rewrite the record, not even an admin. Roles decide who can add to t
 
 ## Running it
 
-Python 3 is the only requirement; nothing else needs to be installed. From the project folder, run:
+The case studies need only Python 3; nothing else has to be installed. From the project folder, run:
 
 ```
 python3 tinker_case_study.py
@@ -81,6 +81,19 @@ python3 navy_case_study.py
 ```
 
 Its last section compares each ship's actual overhaul length against three different planning estimates.
+
+To try the login and roles from the command line:
+
+```
+python3 session.py
+```
+
+The web version (Phase 7, in progress) needs Flask. Install it once, then start the app and open http://127.0.0.1:5000 in your browser:
+
+```
+python3 -m pip install flask
+python3 app.py
+```
 
 ## Case study 1: Tinker's depot delays
 
@@ -130,6 +143,7 @@ Each design decision below traces back to the problems in the case studies.
 
 - Python 3. The tool and the data cleaning use only Python's standard library, so there's nothing to install for them.
 - matplotlib for the charts (`python -m pip install matplotlib`)
+- Flask for the web version (`python -m pip install flask`)
 - A 50,000-job maintenance dataset provided by the faculty mentor, cleaned with Python's built-in `csv` and `datetime` modules so the tool can be tested at scale (Phase 3)
 - SQLite through Python's built-in `sqlite3` module for storage (Phase 5)
 - Password hashing with Python's built-in `hashlib` for the login (Phase 6)
@@ -158,6 +172,11 @@ maintenance-delay-tracker/
 │   Login and roles (Phase 6)
 ├── accounts.py             # user accounts, hashed passwords, login, and what each role may do
 ├── session.py              # one logged-in user working with the tracker; checks permission before every action
+│
+│   Web version (Phase 7)
+├── app.py                  # the Flask app: run it, then open http://127.0.0.1:5000
+├── templates/index.html    # the home page
+├── static/style.css        # the page's colors, fonts, and spacing
 │
 │   Study guides and checking tools
 ├── PROTOTYPE_GUIDE.md      # plain-language walkthrough of the Phase 1 code

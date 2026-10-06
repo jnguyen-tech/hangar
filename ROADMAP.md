@@ -18,6 +18,7 @@ One rule across every phase: be able to explain every line out loud. Scholar's D
 - [x] Replied to the mentor about the dataset
 - [x] Put the project on GitHub, with the dataset excluded ([jnguyen-tech/maintenance-delay-tracker](https://github.com/jnguyen-tech/maintenance-delay-tracker))
 - [ ] Share the GitHub link and `schema.sql` with the mentor for feedback
+- [ ] Turn on two-factor authentication for the GitHub account (Settings, then Password and authentication). Until the app has its own logins, the GitHub login is what protects the project
 - [x] Met with the mentor about the roadmap. He recommended the login system (admin, employee, manager) and a web interface: plain JavaScript first, then React, then animations.
 - [x] Confirmed with the mentor how the dataset can be described publicly
 - [ ] Mentor's email on data cleaning: agree on cleaning scope
@@ -71,7 +72,7 @@ The dataset from the mentor (50,000 jobs, about 119,000 delays, about 182,000 es
 - [ ] Show real dates in the reports: give each `Job` an `open_date`, add a helper that turns a day number into a date (open date + days, using Python's `datetime` module), and print both, like `Apr 2, 2024 (120 days)`. Day numbers stay underneath for the math. This changes the output on purpose, so save a new answer key afterward.
 - [x] Keep post-completion revisions in the history, marked, and report on-time three ways: against the original target, the last target set before finishing, and the final record
 
-## Phase 4 — Results and visuals
+## Phase 4 — Results and visuals ✅
 
 Turn the results into something that reads well on a poster. This comes before the database on purpose: the poster needs results first, and the in-memory tracker can already produce them.
 
@@ -88,7 +89,10 @@ Move the data from in-memory lists into a real database file, using Python's bui
 - [ ] Learn the basics: primary keys, foreign keys, `INSERT`, `SELECT`, `WHERE`, `GROUP BY`
 - [x] Draft the schema (`schema.sql`), including a table for each scenario's delay categories — review it with the mentor
 - [ ] Add a `users` table, and a `logged_by` column on delays and estimates so every entry records who made it (needed for Phase 6)
+- [x] Add `*.db` to `.gitignore`, so the database file (and the mentor's data inside it) never gets committed
 - [ ] Write `db.py`: create the tables from `schema.sql`, then rewrite `create_job`, `log_delay`, `close_job`, and the reports to use SQL
+- [ ] In `db.py`, open every connection through one helper that runs `PRAGMA foreign_keys = ON` (SQLite forgets this setting with each new connection)
+- [ ] Use `?` placeholders for every value in every SQL query, never f-strings, so text someone types can't run as SQL (SQL injection)
 - [ ] Load the cleaned data into the database
 - [ ] Confirm the database blocks edits and deletes to history (the append-only triggers)
 
@@ -112,7 +116,9 @@ The last row is the point: not even an admin can rewrite the record. Roles decid
 
 - [x] `User` and `Accounts` classes in `accounts.py`: username, hashed password, role, and an active flag (accounts are deactivated, never deleted, so old entries still show who made them)
 - [ ] Save the accounts in a `users` table once the database exists (Phase 5)
+- [ ] Once accounts are saved, create the first admin by typing its password when the program asks (`getpass`), never by writing a real password in the code
 - [x] Never store plain passwords: hash them with a salt using Python's built-in `hashlib`
+- [x] Compare hashes with `hmac.compare_digest`, not `==`, so a failed login takes the same time no matter how close the guess was
 - [x] `login(username, password)`: returns the user if the password matches, or `None` if not
 - [x] Permissions as a dictionary of role → allowed actions, plus a `can(user, action)` check
 - [x] `Session` class in `session.py`: one logged-in user working with the tracker. It checks permission before every action, then passes the request to the `Tracker`, which didn't need to learn anything about passwords or roles.
@@ -131,8 +137,10 @@ Recommended by the mentor, in three steps. Each step works on its own before the
 - [ ] HTML basics: tags, headings, paragraphs, links, tables, forms, inputs, and buttons
 - [ ] CSS basics: colors, fonts, spacing, and simple layouts
 - [ ] JavaScript basics in the browser: finding elements on the page, responding to button clicks, and `fetch()` to ask Python for data
-- [ ] Connect the page to Python with Flask (a small library that lets Python answer requests from a web page)
-- [ ] Login page
+- [x] Connect the page to Python with Flask (a small library that lets Python answer requests from a web page): `app.py` serves the home page
+- [ ] Login page. Show the same "wrong username or password" message either way, so nobody can find out which usernames exist
+- [ ] Read Flask's `SECRET_KEY` (it signs the login cookie) from an environment variable, never write it in the code
+- [ ] Log-out button that clears the login
 - [ ] Job list: search by job ID, filter by depot and status
 - [ ] Job page: original vs. current target, the full estimate history with real dates, and each delay with its cause and who logged it
 - [ ] Log-a-delay form (employee and manager)
@@ -162,7 +170,7 @@ The poster uses the Phase 4 results, described the way the mentor approved. If t
 - [ ] Poster design: an Air Force and aviation look that draws people in. Deep navy background, Air Force-style blue for headings and the key chart bars, silver gray, and one gold accent for the headline numbers. Ideas: runway-stripe dividers, a flight-path line linking the sections, a faint blueprint grid, stencil-style section labels, and the job timeline drawn as a flight plan. No official logos or seals, and nothing that brands the poster as a specific base.
 - [ ] Recolor the charts to match the poster (the colors are set once at the top of `charts.py`)
 - [ ] Final poster (42" × 36", PowerPoint exported to PDF) using the Technical category sections: overview, goal, design process, technology, results, reflection
-- [ ] Practice a 1–2 minute pitch and likely questions (for example: "Why not just use a spreadsheet?", "How would this connect to the Air Force's real systems?", "What else could this tool track?", "What if a worker's delay estimate is wrong?", and "Why can't an admin edit the history?")
+- [ ] Practice a 1–2 minute pitch and likely questions (for example: "Why not just use a spreadsheet?", "How would this connect to the Air Force's real systems?", "What else could this tool track?", "What if a worker's delay estimate is wrong?", "Why can't an admin edit the history?", and "How are passwords and data kept safe?")
 
 ## Phase 9 — After the tracker is finished
 
@@ -178,5 +186,7 @@ The poster uses the Phase 4 results, described the way the mentor approved. If t
 - [ ] Work type: add a work-type field to jobs (for example scheduled overhaul, modification, or emergency) and report slip by work type, like real maintenance systems do. Needs data that includes work types.
 - [ ] Estimate accuracy: record how long each delay actually took once fixed, and report how far off workers' estimates run for each category (for example, "discovered-work estimates run 40% low")
 - [ ] Public demo deployment
+  - [ ] Ask the mentor before putting their dataset online; otherwise demo with the case-study data only
+  - [ ] Turn off Flask's `debug=True` first: its error page lets whoever sees it run Python on the server
 - [ ] Short walkthrough video
 - [ ] Resume and LinkedIn write-up; use the project when applying to 76 SMXG, depot-IT contractor, and aviation maintenance software roles
