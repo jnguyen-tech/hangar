@@ -164,7 +164,9 @@ class Tracker:
         if job is None:
             print(f"Error: job {job_id} not found")
             return
-        
+        if job.status == "closed":
+            print(f"Error: job {job_id} is already closed")
+            return
         job.status = "closed"
         job.actual_days = actual_days
         if not self.quiet:
@@ -240,8 +242,17 @@ class Tracker:
 
     def log_delay(self, job_id, logged_on_day, category, description, days_added, event_id=None, logged_by=None):
         """Check the job and category, save a DelayEvent, then revise the estimate."""
-        if self.find_job(job_id) is None:
+        job = self.find_job(job_id)
+        if job is None:
             print(f"Error: job {job_id} not found")
+            return
+
+        if job.status == "closed":
+            print(f"Error: job {job_id} is closed, so no more delays can be logged")
+            return
+
+        if days_added < 1:
+            print("Error: days_added must be at least 1")
             return
 
         if category not in self.categories:
