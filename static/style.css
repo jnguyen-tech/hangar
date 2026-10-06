@@ -1,0 +1,45 @@
+/* style.css: the colors and spacing for every page. */
+
+:root {
+    --navy: #0B1F3A;
+    --blue: #1F4E9E;
+    --gold: #F2B632;
+    --white: #FFFFFF;
+    --light: #F4F6F9;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--light);
+    color: var(--navy);
+}
+
+header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 32px 48px;
+    border-bottom: 6px solid var(--gold);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 36px;
+}
+
+header p {
+    margin: 8px 0 0 0;
+    color: var(--gold);
+}
+
+main {
+    max-width: 800px;
+    margin: 32px auto;
+    padding: 24px 32px;
+    background: var(--white);
+    border-left: 6px solid var(--blue);
+}
+
+h2 {
+    color: var(--blue);
+}
