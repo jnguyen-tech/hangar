@@ -57,6 +57,18 @@ class Session:
             return
         self.tracker.print_summary_report()
 
+    def create_user(self, accounts, username, role, password):
+        if not self.allowed("manage_accounts"):
+            return
+        accounts.create_user(username, role, password)
+
+    def deactivate_user(self, accounts, username):
+        if not self.allowed("manage_accounts"):
+            return
+        if username == self.user.username:
+            print("Error: you can't deactivate your own account")
+            return
+        accounts.deactivate_user(username)
 
 if __name__ == "__main__":
     # Set up three accounts and one shared tracker.
@@ -83,3 +95,12 @@ if __name__ == "__main__":
     manager.close_job(1, 150)                     # allowed
     employee.print_summary_report()               # refused: employees can't view reports
     employee.print_job_report(1)                  # allowed
+    print()
+
+    # Step 6 test: only an admin can manage accounts.
+    employee.create_user(accounts, "employee2", "manager", "sneaky-promotion")   # refused
+    manager.deactivate_user(accounts, "employee1")                               # refused
+    admin.create_user(accounts, "employee2", "employee", "rivet-gun-45")         # allowed
+    admin.deactivate_user(accounts, "admin1")                                    # refused: own account
+    admin.deactivate_user(accounts, "employee2")                                 # allowed
+    print("Login after deactivating:", accounts.login("employee2", "rivet-gun-45"))
