@@ -30,7 +30,7 @@
             </tr>
             {% for row in rows %}
             <tr>
-                <td>{{ row.job_id }}</td>
+                <td><a href="/jobs/{{ row.job_id }}">{{ row.job_id }}</a></td>
                 <td>{{ row.asset }}</td>
                 <td>{{ row.status }}</td>
                 <td>{{ row.original_days }} days</td>
