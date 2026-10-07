@@ -5,6 +5,8 @@
 
 from flask import Flask, render_template
 from load_data import load_tracker
+from charts import count_on_time
+from maintenance_tracker import percent
 
 app = Flask(__name__)
 
@@ -81,6 +83,38 @@ def job_page(job_id):
         days_late=job.actual_days - original,
         history=history,
         delays=delays,
+    )
+
+@app.route("/reports")
+def reports():
+    """The on-time comparison and the slip by cause, for all jobs."""
+    counts = count_on_time(tracker)
+    closed = counts["closed"]
+    on_time_rows = [
+        {"label": "Original target", "jobs": counts["original"], "percent": percent(counts["original"], closed)},
+        {"label": "Last target set before the job finished", "jobs": counts["regular"], "percent": percent(counts["regular"], closed)},
+        {"label": "Final record (after-the-fact revisions)", "jobs": counts["final"], "percent": percent(counts["final"], closed)},
+    ]
+
+    totals = tracker.total_days_by_category(tracker.delay_events)
+    total_days = 0
+    for category in tracker.categories:
+        total_days += totals[category]
+
+    cause_rows = []
+    for category in tracker.categories:
+        cause_rows.append({
+            "category": category,
+            "days": totals[category],
+            "percent": percent(totals[category], total_days),
+        })
+
+    return render_template(
+        "reports.html",
+        closed=closed,
+        on_time_rows=on_time_rows,
+        total_days=total_days,
+        cause_rows=cause_rows,
     )
 
 if __name__ == "__main__":

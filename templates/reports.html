@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports - Maintenance Delay Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>Maintenance Delay Tracker</h1>
+        <p>Keeps the original plan on record, so a job can't look on time just because its deadline moved.</p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/jobs">Jobs</a>
+            <a href="/reports">Reports</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Reports</h2>
+
+        <h3>Jobs counted as on time</h3>
+        <p>The same {{ closed }} finished jobs, measured against three different targets.</p>
+        <table>
+            <tr>
+                <th>Measured against</th>
+                <th>Jobs on time</th>
+                <th>Percent</th>
+            </tr>
+            {% for row in on_time_rows %}
+            <tr>
+                <td>{{ row.label }}</td>
+                <td>{{ row.jobs }}</td>
+                <td>{{ row.percent }}%</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3>Delay days by cause</h3>
+        <p>{{ total_days }} delay days in total, across all jobs.</p>
+        <table>
+            <tr>
+                <th>Cause</th>
+                <th>Days</th>
+                <th>Percent</th>
+            </tr>
+            {% for row in cause_rows %}
+            <tr>
+                <td>{{ row.category }}</td>
+                <td>{{ row.days }}</td>
+                <td>{{ row.percent }}%</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </main>
+</body>
+</html>
