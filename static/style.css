@@ -84,5 +84,14 @@ tr:hover td {
 
 /* The logo in the header */
 .logo {
-    height: 150px;
+    height: 120px;
+}
+
+/* The strip at the top of every page in demo mode */
+.demo-banner {
+    margin: 0;
+    padding: 8px 48px;
+    background: var(--gold);
+    color: var(--navy);
+    font-weight: bold;
 }

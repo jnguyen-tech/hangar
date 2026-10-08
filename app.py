@@ -7,13 +7,27 @@ from flask import Flask, render_template
 from load_data import load_tracker
 from charts import count_on_time
 from maintenance_tracker import percent
+from demo_data import load_demo_tracker
 
 app = Flask(__name__)
 
+# True = made-up sample jobs, safe to show anyone.
+# False = the real dataset in data/clean/ (keep it private).
+DEMO = True
+
 # Load all the jobs once, when the program starts.
 print("Loading jobs...")
-tracker = load_tracker()
+if DEMO:
+    tracker = load_demo_tracker()
+else:
+    tracker = load_tracker()
 print("Loaded", len(tracker.jobs), "jobs")
+
+
+@app.context_processor
+def add_demo_flag():
+    """Let every page know whether this is the demo, so it can show the banner."""
+    return {"demo": DEMO}
 
 
 @app.route("/")
@@ -38,6 +52,7 @@ def job_list():
         }
         rows.append(row)
     return render_template("jobs.html", rows=rows, total=len(tracker.jobs))
+
 
 @app.route("/jobs/<job_id>")
 def job_page(job_id):
@@ -85,6 +100,7 @@ def job_page(job_id):
         delays=delays,
     )
 
+
 @app.route("/reports")
 def reports():
     """The on-time comparison and the slip by cause, for all jobs."""
@@ -116,6 +132,7 @@ def reports():
         total_days=total_days,
         cause_rows=cause_rows,
     )
+
 
 if __name__ == "__main__":
     app.run(debug=True)

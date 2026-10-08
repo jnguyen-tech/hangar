@@ -6,6 +6,9 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    {% if demo %}
+    <p class="demo-banner">Demo version: every job on this site is made-up sample data.</p>
+    {% endif %}
     <header>
         <h1><img src="/static/hangar-logo-navy.png" alt="Hangar" class="logo"></h1>
         <p>Keeps the original plan on record, so a job can't look on time just because its deadline moved.</p>
@@ -17,8 +20,11 @@
     </header>
 
     <main>
-        <h2>Welcome</h2>
-        <p>This is page 1. The job list, the reports, and the login come next.</p>
+        <h2>Welcome to Hangar</h2>
+        <p>Hangar tracks maintenance delays without overwriting the original plan. Every delay is logged with its cause, and every change to a job's target finish is saved as a new version. So a job can't look on time just because its deadline kept moving.</p>
+        {% if demo %}
+        <p>Start with <a href="/jobs/DEMO-0001">job DEMO-0001</a> to see one job's full history, or open the <a href="/reports">reports</a>.</p>
+        {% endif %}
     </main>
 </body>
 </html>
