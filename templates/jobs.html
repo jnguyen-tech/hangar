@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jobs - Flightline</title>
+    <title>Jobs - Hangar</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <header>
-        <h1>Flightline</h1>
+        <h1><img src="/static/hangar-logo-navy.png" alt="Hangar" class="logo"></h1>
         <p>Keeps the original plan on record, so a job can't look on time just because its deadline moved.</p>
         <nav>
             <a href="/">Home</a>
@@ -20,7 +20,13 @@
         <h2>Jobs</h2>
         <p>Showing the first {{ rows|length }} of {{ total }} jobs.</p>
 
-        <table>
+        <p>
+            <label for="search-box">Filter these jobs:</label>
+            <input type="text" id="search-box" placeholder="Type a job, asset, or status">
+        </p>
+        <p id="match-count"></p>
+
+        <table id="job-table">
             <tr>
                 <th>Job</th>
                 <th>Asset</th>
@@ -41,5 +47,7 @@
             {% endfor %}
         </table>
     </main>
+
+    <script src="/static/jobs.js"></script>
 </body>
 </html>

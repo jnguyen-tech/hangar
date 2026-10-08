@@ -11,13 +11,13 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: var(--light);
+    background: var(--navy);
     color: var(--navy);
 }
 
 header {
-    background: var(--navy);
-    color: var(--white);
+    background: var(--light);
+    color: var(--navy);
     padding: 32px 48px;
     border-bottom: 6px solid var(--gold);
 }
@@ -29,7 +29,7 @@ header h1 {
 
 header p {
     margin: 8px 0 0 0;
-    color: var(--gold);
+    color: var(--blue);
 }
 
 main {
@@ -44,21 +44,20 @@ h2 {
     color: var(--blue);
 }
 
-
 /* The navigation links in the header */
 nav {
     margin-top: 16px;
 }
 
 nav a {
-    color: var(--white);
+    color: var(--navy);
     text-decoration: none;
     margin-right: 24px;
     font-weight: bold;
 }
 
 nav a:hover {
-    color: var(--gold);
+    color: var(--blue);
 }
 
 /* Tables */
@@ -81,4 +80,9 @@ td {
 
 tr:hover td {
     background: var(--light);
+}
+
+/* The logo in the header */
+.logo {
+    height: 150px;
 }
