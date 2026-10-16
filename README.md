@@ -1,4 +1,4 @@
-# Maintenance Delay Tracker
+# Hangar: A Maintenance Delay Tracker
 
 John Nguyen, Oklahoma City Community College
 
@@ -53,11 +53,11 @@ All durations are **calendar days**: every day counts, including weekends and ho
 
 No role can rewrite the record, not even an admin. Roles decide who can add to the history, never who can change it. (This is a demo login; real Air Force systems use CAC cards and single sign-on.)
 
-**A web interface**, so the tracker can be used from a browser instead of the command line: a job list, a page for each job's full history, a form for logging delays, and the reports. It's built in three steps: plain HTML, CSS, and JavaScript first, then rebuilt in React, then animations, including an animated timeline that shows a job's target date sliding out with each delay while the original stays pinned. Python keeps handling the logic and the database.
+**A web interface**, so the tracker can be used from a browser instead of the command line. The first version runs on plain HTML, CSS, and a little JavaScript, connected to Python with Flask. Run `python app.py`, then open `http://127.0.0.1:5000` to see a home page, a job list with a filter box, a page for each job's full estimate history and delays, and the reports. By default it runs in demo mode, on 200 made-up jobs from `demo_data.py`, so it works without the private dataset; a banner on every page says so. Setting `DEMO = False` at the top of `app.py` switches it to the cleaned dataset. Next come a search across every job, a login page, and a form for logging delays. After that, the pages get rebuilt in React and then animated, including a timeline that shows a job's target date sliding out with each delay while the original stays pinned. Python keeps handling the logic and the database.
 
 ## Running it
 
-The case studies need only Python 3; nothing else has to be installed. From the project folder, run:
+The case studies need only Python 3; nothing else needs to be installed. From the project folder, run:
 
 ```
 python3 tinker_case_study.py
@@ -88,12 +88,21 @@ To try the login and roles from the command line:
 python3 session.py
 ```
 
-The web version (Phase 7, in progress) needs Flask. Install it once, then start the app and open http://127.0.0.1:5000 in your browser:
+### Running the website
+
+The website needs two libraries, Flask and matplotlib (the reports page reuses code from `charts.py`). Install them once:
 
 ```
-python3 -m pip install flask
-python3 app.py
+python -m pip install flask matplotlib
 ```
+
+Then, from the project folder:
+
+```
+python app.py
+```
+
+and open `http://127.0.0.1:5000` in a browser. It starts in **demo mode**: 200 made-up jobs from `demo_data.py`, with a banner on every page saying so, so it runs without the private dataset. To use the cleaned dataset instead, set `DEMO = False` near the top of `app.py`; that needs the data files (see "Getting the data" below).
 
 ## Case study 1: Tinker's depot delays
 
@@ -143,11 +152,10 @@ Each design decision below traces back to the problems in the case studies.
 
 - Python 3. The tool and the data cleaning use only Python's standard library, so there's nothing to install for them.
 - matplotlib for the charts (`python -m pip install matplotlib`)
-- Flask for the web version (`python -m pip install flask`)
 - A 50,000-job maintenance dataset provided by the faculty mentor, cleaned with Python's built-in `csv` and `datetime` modules so the tool can be tested at scale (Phase 3)
 - SQLite through Python's built-in `sqlite3` module for storage (Phase 5)
 - Password hashing with Python's built-in `hashlib` for the login (Phase 6)
-- Plain HTML, CSS, and JavaScript for the web interface, connected to Python with Flask, then React, with CSS and Framer Motion or GSAP for animations (Phase 7)
+- Plain HTML, CSS, and JavaScript for the web interface, connected to Python with Flask (`python -m pip install flask`), then React, with CSS and Framer Motion or GSAP for animations (Phase 7)
 
 ## Project structure
 
@@ -173,10 +181,11 @@ maintenance-delay-tracker/
 ├── accounts.py             # user accounts, hashed passwords, login, and what each role may do
 ├── session.py              # one logged-in user working with the tracker; checks permission before every action
 │
-│   Web version (Phase 7)
-├── app.py                  # the Flask app: run it, then open http://127.0.0.1:5000
-├── templates/index.html    # the home page
-├── static/style.css        # the page's colors, fonts, and spacing
+│   Web interface (Phase 7)
+├── app.py                  # the website: Flask matches each page address to the Python that builds it
+├── demo_data.py            # 200 made-up jobs, so the website can be shown without the private dataset
+├── templates/              # the HTML pages: home, job list, one job, reports
+├── static/                 # style.css (the look), jobs.js (the filter box), and the Hangar logo
 │
 │   Study guides and checking tools
 ├── PROTOTYPE_GUIDE.md      # plain-language walkthrough of the Phase 1 code
@@ -219,7 +228,7 @@ python charts.py
 
 ## Progress
 
-Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A 50,000-job maintenance dataset provided by the faculty mentor has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). The login system works from the command line: accounts with hashed passwords, three roles, a permission check before every action, and every delay stamped with who logged it (Phase 6). Next come the Scholar's Day abstract and poster, the SQLite database, and a web interface. See [ROADMAP.md](ROADMAP.md) for the full checklist.
+Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A 50,000-job maintenance dataset provided by the faculty mentor has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). The login system works from the command line: accounts with hashed passwords, three roles, a permission check before every action, and every delay stamped with who logged it (Phase 6). The first web pages run with Flask: a job list with a filter box, a page for each job, and the reports, plus a demo mode with made-up jobs so the site can be shown publicly (Phase 7). Next come the Scholar's Day abstract and poster, the rest of the web interface, and the SQLite database. See [ROADMAP.md](ROADMAP.md) for the full checklist.
 
 ## Presenting this project
 
@@ -235,4 +244,4 @@ What this project actually is: a general maintenance delay tracker, tested on re
 
 ## Why this project
 
-Built as a portfolio piece aimed at maintenance and sustainment software roles — the systems that manage maintenance workflows and readiness tracking, as distinct from avionics or flight-systems work. The Tinker case study targets depot IT work at Tinker AFB (76 SMXG) and the contractor ecosystem that supports it, while the general design applies equally to civilian aviation maintenance tracking, including FAA-regulated maintenance.
+Built as a portfolio piece aimed at maintenance and sustainment software roles — the systems that manage maintenance workflows and readiness tracking, as distinct from avionics or flight-systems work. The Tinker case study targets depot IT work at Tinker AFB (the 76th Software Engineering Group) and the contractor ecosystem that supports it, while the general design applies equally to civilian aviation maintenance tracking, including FAA-regulated maintenance.

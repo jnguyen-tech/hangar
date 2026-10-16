@@ -1,6 +1,6 @@
 # Roadmap
 
-The project is a general maintenance delay tracker, built in phases. Each phase ends with something that runs, and each one builds on the last instead of replacing it.
+The project is **Hangar**, a general maintenance delay tracker, built in phases. Each phase ends with something that runs, and each one builds on the last instead of replacing it.
 
 **Current focus: finishing the tracker**, with Tinker's depot delays (from the GAO report) as the main case study: cleaned data, results, a database, user accounts, and a web interface. The Navy case study already runs (in plain Python) and is on hold until the tracker is finished (Phase 9).
 
@@ -21,7 +21,7 @@ One rule across every phase: be able to explain every line out loud. Scholar's D
 - [ ] Turn on two-factor authentication for the GitHub account (Settings, then Password and authentication). Until the app has its own logins, the GitHub login is what protects the project
 - [x] Met with the mentor about the roadmap. He recommended the login system (admin, employee, manager) and a web interface: plain JavaScript first, then React, then animations.
 - [x] Confirmed with the mentor how the dataset can be described publicly
-- [ ] Mentor's email on data cleaning: agree on cleaning scope
+- [x] Mentor sent a data cleaning guide. Plan: keep `cleaning.py` in plain Python and add the outputs the guide asks for (see the end of Phase 3)
 
 ## Phase 1 — Plain-Python prototype ✅
 
@@ -71,6 +71,15 @@ The dataset from the mentor (50,000 jobs, about 119,000 delays, about 182,000 es
 - [x] Load the cleaned data into the tracker (`load_data.py`) and run the reports. The Tracker rebuilt the dataset's full estimate history from the original plans and the delays alone: all 182,403 estimates match.
 - [ ] Show real dates in the reports: give each `Job` an `open_date`, add a helper that turns a day number into a date (open date + days, using Python's `datetime` module), and print both, like `Apr 2, 2024 (120 days)`. Day numbers stay underneath for the math. This changes the output on purpose, so save a new answer key afterward.
 - [x] Keep post-completion revisions in the history, marked, and report on-time three ways: against the original target, the last target set before finishing, and the final record
+
+**Outputs the mentor's cleaning guide asks for.** `cleaning.py` already does the cleaning; these make the work easy to check.
+
+- [ ] Cleaning log: each issue, what was done, how many records it affected, and why
+- [ ] Data-quality report with before-and-after row counts, made by a small `validate_data.py` written with pandas
+- [ ] Save the flagged jobs (status conflicts and same-day jobs) to their own file, so nothing looks quietly deleted
+- [ ] Rename the cleaned delay file to `delay_events_clean.csv` (the name the guide uses), and update `load_data.py` to match
+- [x] README explains how to rerun the cleaning ("Getting the data")
+- [ ] Spend about 20 minutes in OpenRefine on one raw file, to learn facets
 
 ## Phase 4 — Results and visuals ✅
 
@@ -134,10 +143,15 @@ Recommended by the mentor, in three steps. Each step works on its own before the
 
 **Step A — Plain HTML, CSS, and JavaScript.** No frameworks, and only the basics, so every piece can be explained.
 
+Working so far (run `python app.py`): a home page that explains Hangar, the job list (first 100 jobs, with a filter box in JavaScript), a page for each job, the reports page, one shared stylesheet, and the Hangar logo on a light header.
+
+**Demo mode.** `demo_data.py` builds 200 made-up jobs, and the `DEMO` switch at the top of `app.py` picks which data the site uses (`True` = made-up jobs, `False` = the real dataset). In demo mode, a gold banner on every page says the data is made up. This lets the site be shown to anyone without the private dataset.
+
 - [ ] HTML basics: tags, headings, paragraphs, links, tables, forms, inputs, and buttons
 - [ ] CSS basics: colors, fonts, spacing, and simple layouts
 - [ ] JavaScript basics in the browser: finding elements on the page, responding to button clicks, and `fetch()` to ask Python for data
-- [x] Connect the page to Python with Flask (a small library that lets Python answer requests from a web page): `app.py` serves the home page
+- [x] Connect the page to Python with Flask (a small library that lets Python answer requests from a web page)
+- [x] Demo mode with made-up data (`demo_data.py`), so the site can be shown publicly
 - [ ] Login page. Show the same "wrong username or password" message either way, so nobody can find out which usernames exist
 - [ ] Read Flask's `SECRET_KEY` (it signs the login cookie) from an environment variable, never write it in the code
 - [ ] Log-out button that clears the login
@@ -165,11 +179,13 @@ Recommended by the mentor, in three steps. Each step works on its own before the
 
 The poster uses the Phase 4 results, described the way the mentor approved. If the login and web interface are working by then, they become a live demo; if not, they go under "Next steps."
 
+- [x] Name and logo: Hangar, with navy and white versions on see-through backgrounds
+- [x] Career fair prep (Oct 9): a 30-second pitch and phone screenshots of the demo (made-up data only)
 - [ ] Abstract (150–250 words), framed as tool + case study: question, why it matters, what was built, findings, implications
 - [ ] Rough poster draft to the mentor
 - [ ] Poster design: an Air Force and aviation look that draws people in. Deep navy background, Air Force-style blue for headings and the key chart bars, silver gray, and one gold accent for the headline numbers. Ideas: runway-stripe dividers, a flight-path line linking the sections, a faint blueprint grid, stencil-style section labels, and the job timeline drawn as a flight plan. No official logos or seals, and nothing that brands the poster as a specific base.
 - [ ] Recolor the charts to match the poster (the colors are set once at the top of `charts.py`)
-- [ ] Final poster (42" × 36", PowerPoint exported to PDF) using the Technical category sections: overview, goal, design process, technology, results, reflection
+- [ ] Final poster (42" × 36", made in Canva and exported to PDF) using the Technical category sections: overview, goal, design process, technology, results, reflection
 - [ ] Practice a 1–2 minute pitch and likely questions (for example: "Why not just use a spreadsheet?", "How would this connect to the Air Force's real systems?", "What else could this tool track?", "What if a worker's delay estimate is wrong?", "Why can't an admin edit the history?", and "How are passwords and data kept safe?")
 
 ## Phase 9 — After the tracker is finished
@@ -189,4 +205,4 @@ The poster uses the Phase 4 results, described the way the mentor approved. If t
   - [ ] Ask the mentor before putting their dataset online; otherwise demo with the case-study data only
   - [ ] Turn off Flask's `debug=True` first: its error page lets whoever sees it run Python on the server
 - [ ] Short walkthrough video
-- [ ] Resume and LinkedIn write-up; use the project when applying to 76 SMXG, depot-IT contractor, and aviation maintenance software roles
+- [ ] Resume and LinkedIn write-up; use the project when applying to the 76th Software Engineering Group, depot-IT contractor, and aviation maintenance software roles

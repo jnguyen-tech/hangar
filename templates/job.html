@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ job.job_id }} - Hangar</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    {% if demo %}
+    <p class="demo-banner">Demo version: every job on this site is made-up sample data.</p>
+    {% endif %}
+    <header>
+        <h1><img src="/static/hangar-logo-navy.png" alt="Hangar" class="logo"></h1>
+        <p>Keeps the original plan on record, so a job can't look on time just because its deadline moved.</p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/jobs">Jobs</a>
+            <a href="/reports">Reports</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>{{ job.job_id }}</h2>
+        <p>Asset: {{ job.asset }}. Status: {{ job.status }}.</p>
+
+        <h3>Targets</h3>
+        <table>
+            <tr>
+                <th>Measure</th>
+                <th>Days</th>
+            </tr>
+            <tr>
+                <td>Original target</td>
+                <td>{{ original }}</td>
+            </tr>
+            <tr>
+                <td>Last target set before the job finished</td>
+                <td>{{ last_regular }}</td>
+            </tr>
+            <tr>
+                <td>Final record</td>
+                <td>{{ final }}</td>
+            </tr>
+            <tr>
+                <td>Actually finished in</td>
+                <td>{{ job.actual_days }}</td>
+            </tr>
+            <tr>
+                <td>Days late against the original target</td>
+                <td>{{ days_late }}</td>
+            </tr>
+        </table>
+
+        <h3>Estimate history</h3>
+        <table>
+            <tr>
+                <th>Version</th>
+                <th>Target</th>
+                <th>Reason</th>
+                <th>When it was set</th>
+            </tr>
+            {% for row in history %}
+            <tr>
+                <td>v{{ row.version }}</td>
+                <td>{{ row.target_days }} days</td>
+                <td>{{ row.reason }}</td>
+                <td>{{ row.when }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3>Delays</h3>
+        <table>
+            <tr>
+                <th>Day logged</th>
+                <th>Cause</th>
+                <th>Days added</th>
+                <th>Description</th>
+            </tr>
+            {% for row in delays %}
+            <tr>
+                <td>{{ row.day }}</td>
+                <td>{{ row.category }}</td>
+                <td>{{ row.days_added }}</td>
+                <td>{{ row.description }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <p><a href="/jobs">Back to all jobs</a></p>
+    </main>
+</body>
+</html>

@@ -11,13 +11,13 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: var(--light);
+    background: var(--navy);
     color: var(--navy);
 }
 
 header {
-    background: var(--navy);
-    color: var(--white);
+    background: var(--light);
+    color: var(--navy);
     padding: 32px 48px;
     border-bottom: 6px solid var(--gold);
 }
@@ -29,11 +29,11 @@ header h1 {
 
 header p {
     margin: 8px 0 0 0;
-    color: var(--gold);
+    color: var(--blue);
 }
 
 main {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 32px auto;
     padding: 24px 32px;
     background: var(--white);
@@ -42,4 +42,56 @@ main {
 
 h2 {
     color: var(--blue);
+}
+
+/* The navigation links in the header */
+nav {
+    margin-top: 16px;
+}
+
+nav a {
+    color: var(--navy);
+    text-decoration: none;
+    margin-right: 24px;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: var(--blue);
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: var(--navy);
+    color: var(--white);
+    text-align: left;
+    padding: 10px 12px;
+}
+
+td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #D8DDE5;
+}
+
+tr:hover td {
+    background: var(--light);
+}
+
+/* The logo in the header */
+.logo {
+    height: 120px;
+}
+
+/* The strip at the top of every page in demo mode */
+.demo-banner {
+    margin: 0;
+    padding: 8px 48px;
+    background: var(--gold);
+    color: var(--navy);
+    font-weight: bold;
 }
