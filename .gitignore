@@ -3,6 +3,9 @@
 # See "Getting the data" in README.md.
 data/
 
+# The SQLite database (Phase 5) will hold the mentor's data, so it stays off GitHub too.
+*.db
+
 # Python's cache files (made automatically when a file is imported)
 __pycache__/
 *.pyc

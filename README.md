@@ -82,6 +82,12 @@ python3 navy_case_study.py
 
 Its last section compares each ship's actual overhaul length against three different planning estimates.
 
+To try the login and roles from the command line:
+
+```
+python3 session.py
+```
+
 ### Running the website
 
 The website needs two libraries, Flask and matplotlib (the reports page reuses code from `charts.py`). Install them once:
