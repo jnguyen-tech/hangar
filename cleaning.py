@@ -1,5 +1,5 @@
 # cleaning.py
-# Phase 4: functions that clean the raw data, one problem at a time.
+# Phase 3: functions that clean the raw data, one problem at a time.
 
 import csv
 import os

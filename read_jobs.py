@@ -1,5 +1,5 @@
 # read_jobs.py
-# Phase 4, step 1: open the jobs file and look at the first few rows.
+# Phase 3, step 1: open the jobs file and look at the first few rows.
 
 import csv
 import os

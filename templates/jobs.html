@@ -21,15 +21,31 @@
 
     <main>
         <h2>Jobs</h2>
-        <p>Showing the first {{ rows|length }} of {{ total }} jobs.</p>
 
+        <!-- The search form. Pressing Search sends the browser to
+             /jobs?search=whatever-you-typed, and app.py reads that. -->
+        <form action="/jobs" method="get" class="search-form">
+            <label for="search-box">Search all jobs:</label>
+            <input type="text" id="search-box" name="search" value="{{ search }}" placeholder="Job ID, asset, or status">
+            <button type="submit">Search</button>
+            {% if search %}
+            <a href="/jobs">Clear</a>
+            {% endif %}
+        </form>
+
+        {% if match_count == 0 %}
+        <p>No jobs match "{{ search }}".</p>
+        {% else %}
         <p>
-            <label for="search-box">Filter these jobs:</label>
-            <input type="text" id="search-box" placeholder="Type a job, asset, or status">
+            {% if search %}
+            {{ match_count }} of {{ total }} jobs match "{{ search }}".
+            {% else %}
+            {{ total }} jobs in all.
+            {% endif %}
+            Showing {{ first_number }} to {{ last_number }} (page {{ page }} of {{ total_pages }}).
         </p>
-        <p id="match-count"></p>
 
-        <table id="job-table">
+        <table>
             <tr>
                 <th>Job</th>
                 <th>Asset</th>
@@ -44,13 +60,29 @@
                 <td>{{ row.asset }}</td>
                 <td>{{ row.status }}</td>
                 <td>{{ row.original_days }} days</td>
-                <td>{{ row.actual_days }} days</td>
+                <td>
+                    {% if row.actual_days is none %}
+                    not finished
+                    {% else %}
+                    {{ row.actual_days }} days
+                    {% endif %}
+                </td>
                 <td>{{ row.days_late }}</td>
             </tr>
             {% endfor %}
         </table>
-    </main>
 
-    <script src="/static/jobs.js"></script>
+        <!-- Previous / Next links. url_for builds the web address for us,
+             like /jobs?search=b-52&page=3, and keeps the search when you change pages. -->
+        <p class="pager">
+            {% if page > 1 %}
+            <a href="{{ url_for('job_list', search=search, page=page - 1) }}">&larr; Previous</a>
+            {% endif %}
+            {% if page < total_pages %}
+            <a href="{{ url_for('job_list', search=search, page=page + 1) }}">Next &rarr;</a>
+            {% endif %}
+        </p>
+        {% endif %}
+    </main>
 </body>
 </html>

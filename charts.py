@@ -184,12 +184,20 @@ def chart_job_timeline(tracker, job_id):
     ax.text((original_days + job.actual_days) / 2, -0.12, f"{days_late} days late",
             ha="center", fontsize=11, fontweight="bold", color=TEXT)
 
-    ax.set_xlim(0, 270)
+    ax.set_xlim(0, max(max(targets), job.actual_days) + 50)
     ax.set_ylim(len(targets) - 0.5, -0.8)
     ax.set_xlabel("Days after the job opened", fontsize=11, color=SOFT_TEXT)
+    # Pick a title that matches what actually happened to this job.
+    final_days = estimates[-1].target_days
+    if days_late <= 0:
+        title = "This job finished on time against its original plan"
+    elif job.actual_days <= final_days:
+        title = f"This job finished {days_late} days late, but its record says on time"
+    else:
+        title = f"This job finished {days_late} days late"
     style_chart(
         fig, ax,
-        f"This job finished {days_late} days late, but its record says on time",
+        title,
         f"Job {job_id}: each bar is one version of the target finish date",
     )
     save_chart(fig, "job_timeline.png")

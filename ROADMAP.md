@@ -127,7 +127,7 @@ The last row is the point: not even an admin can rewrite the record. Roles decid
 - [x] `Session` class in `session.py`: one logged-in user working with the tracker. It checks permission before every action, then passes the request to the `Tracker`, which didn't need to learn anything about passwords or roles.
 - [x] Stamp every delay with `logged_by`
 - [x] Only an admin, working through a `Session`, can create or deactivate accounts (and an admin can't deactivate their own account)
-- [x] The `Tracker` refuses a delay on a closed job, closing a job twice, and a delay of less than 1 day. After a job closes, its target can only change through a marked post-completion revision.
+- [x] The `Tracker` refuses a delay on a closed job, closing a job twice, a delay of less than 1 day, a planned length under 1 day, a negative finish day, removing a delay category that's already in use, and a post-completion revision on a job that hasn't finished. After a job closes, its target can only change through a marked post-completion revision.
 - [x] Test each role from the command line (for example, an employee trying to close a job gets refused)
 - [ ] Note for the poster: this is a demo login. Real Air Force systems use CAC cards and single sign-on, which this project doesn't attempt.
 

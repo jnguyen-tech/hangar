@@ -95,3 +95,23 @@ tr:hover td {
     color: var(--navy);
     font-weight: bold;
 }
+
+/* The search form on the Jobs page */
+.search-form input {
+    padding: 6px 8px;
+    width: 260px;
+}
+
+.search-form button {
+    padding: 6px 14px;
+    background: var(--blue);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+}
+
+/* The Previous / Next links under the job table */
+.pager a {
+    margin-right: 24px;
+    font-weight: bold;
+}

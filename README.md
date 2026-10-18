@@ -4,6 +4,8 @@ John Nguyen, Oklahoma City Community College
 
 A general-purpose tool for tracking maintenance delays honestly: it keeps the original plan on record instead of overwriting it. Its main case study, built from a public GAO report, is depot maintenance delays at Tinker AFB. A second case study on Navy ship maintenance shows the same tool works elsewhere.
 
+> **Try it live:** _link coming soon_
+
 > **Status:** Demo / portfolio project. It is not connected to any Air Force, Navy, or other maintenance system, and nothing in this repository is official data or an official measure of performance. The example jobs in the case study files are made up.
 
 ## The idea
@@ -53,7 +55,7 @@ All durations are **calendar days**: every day counts, including weekends and ho
 
 No role can rewrite the record, not even an admin. Roles decide who can add to the history, never who can change it. (This is a demo login; real Air Force systems use CAC cards and single sign-on.)
 
-**A web interface**, so the tracker can be used from a browser instead of the command line. The first version runs on plain HTML, CSS, and a little JavaScript, connected to Python with Flask. Run `python app.py`, then open `http://127.0.0.1:5000` to see a home page, a job list with a filter box, a page for each job's full estimate history and delays, and the reports. By default it runs in demo mode, on 200 made-up jobs from `demo_data.py`, so it works without the private dataset; a banner on every page says so. Setting `DEMO = False` at the top of `app.py` switches it to the cleaned dataset. Next come a search across every job, a login page, and a form for logging delays. After that, the pages get rebuilt in React and then animated, including a timeline that shows a job's target date sliding out with each delay while the original stays pinned. Python keeps handling the logic and the database.
+**A web interface**, so the tracker can be used from a browser instead of the command line. The first version runs on plain HTML, CSS, and a little JavaScript, connected to Python with Flask. Run `python app.py`, then open `http://127.0.0.1:5000` to see a home page, a job list with a search across every job and Previous / Next pages, a page for each job's full estimate history and delays, and the reports. It uses the 50,000-job dataset when the data files are present, and otherwise runs in demo mode on 200 made-up jobs from `demo_data.py`, with a banner on every page saying so. Next come a login page and a form for logging delays. After that, the pages get rebuilt in React and then animated, including a timeline that shows a job's target date sliding out with each delay while the original stays pinned. Python keeps handling the logic and the database.
 
 ## Running it
 
@@ -96,7 +98,7 @@ Then, from the project folder:
 python app.py
 ```
 
-and open `http://127.0.0.1:5000` in a browser. It starts in **demo mode**: 200 made-up jobs from `demo_data.py`, with a banner on every page saying so, so it runs without the private dataset. To use the cleaned dataset instead, set `DEMO = False` near the top of `app.py`; that needs the data files (see "Getting the data" below).
+and open `http://127.0.0.1:5000` in a browser. If the cleaned data files are in `data/clean/`, it uses the 50,000-job dataset. If they aren't (they're not on GitHub), it starts in **demo mode**: 200 made-up jobs from `demo_data.py`, with a banner on every page saying so. Either way, it runs. (You can also install everything at once with `python -m pip install -r requirements.txt`.)
 
 ## Case study 1: Tinker's depot delays
 
@@ -146,7 +148,7 @@ Each design decision below traces back to the problems in the case studies.
 
 - Python 3. The tool and the data cleaning use only Python's standard library, so there's nothing to install for them.
 - matplotlib for the charts (`python -m pip install matplotlib`)
-- A 50,000-job maintenance dataset provided by the faculty mentor, cleaned with Python's built-in `csv` and `datetime` modules so the tool can be tested at scale (Phase 3)
+- A synthetic 50,000-job maintenance dataset sourced from TFCU, cleaned with Python's built-in `csv` and `datetime` modules so the tool can be tested at scale (Phase 3)
 - SQLite through Python's built-in `sqlite3` module for storage (Phase 5)
 - Password hashing with Python's built-in `hashlib` for the login (Phase 6)
 - Plain HTML, CSS, and JavaScript for the web interface, connected to Python with Flask (`python -m pip install flask`), then React, with CSS and Framer Motion or GSAP for animations (Phase 7)
@@ -177,9 +179,10 @@ maintenance-delay-tracker/
 │
 │   Web interface (Phase 7)
 ├── app.py                  # the website: Flask matches each page address to the Python that builds it
-├── demo_data.py            # 200 made-up jobs, so the website can be shown without the private dataset
+├── demo_data.py            # 200 made-up jobs, used when the data files aren't there
+├── requirements.txt        # the packages the website needs (Flask and matplotlib)
 ├── templates/              # the HTML pages: home, job list, one job, reports
-├── static/                 # style.css (the look), jobs.js (the filter box), and the Hangar logo
+├── static/                 # style.css (the look) and the Hangar logo
 │
 │   Study guides and checking tools
 ├── PROTOTYPE_GUIDE.md      # plain-language walkthrough of the Phase 1 code
@@ -195,7 +198,7 @@ maintenance-delay-tracker/
 
 ### Getting the data
 
-The dataset and my notes on it aren't included in this repository. They were shared by the faculty mentor for this project and aren't mine to publish. The case studies and the Phase 2 check (`compare_outputs.py`) don't need them.
+The dataset is synthetic (artificial replica data, with no real or sensitive records), sourced from TFCU and shared by my faculty mentor. It isn't included in this repository because the files are large. The website falls back to demo mode without it, and the case studies and the Phase 2 check (`compare_outputs.py`) don't need it.
 
 To run the cleaning code, put the dataset's files in `data/raw/`:
 
@@ -222,7 +225,7 @@ python charts.py
 
 ## Progress
 
-Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A 50,000-job maintenance dataset provided by the faculty mentor has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). The login system works from the command line: accounts with hashed passwords, three roles, a permission check before every action, and every delay stamped with who logged it (Phase 6). The first web pages run with Flask: a job list with a filter box, a page for each job, and the reports, plus a demo mode with made-up jobs so the site can be shown publicly (Phase 7). Next come the Scholar's Day abstract and poster, the rest of the web interface, and the SQLite database. See [ROADMAP.md](ROADMAP.md) for the full checklist.
+Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A synthetic 50,000-job maintenance dataset sourced from TFCU has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). The login system works from the command line: accounts with hashed passwords, three roles, a permission check before every action, and every delay stamped with who logged it (Phase 6). The website runs with Flask: a job list that searches all 50,000 jobs, a page for each job, and the reports, plus a demo mode with made-up jobs (Phase 7). The Scholar's Day abstract is submitted and the poster is in final edits. Next come putting the site online, a login page and delay form on the website, and the SQLite database. See [ROADMAP.md](ROADMAP.md) for the full checklist.
 
 ## Presenting this project
 

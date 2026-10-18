@@ -2,6 +2,7 @@
 # Phase 6: user accounts and roles for the maintenance delay tracker.
 
 import hashlib
+import hmac
 import os
 
 ROLES = ["employee", "manager", "admin"]
@@ -87,7 +88,7 @@ class Accounts:
         if not user.active:
             return None
 
-        if hash_password(password, user.salt) != user.password_hash:
+        if not hmac.compare_digest(hash_password(password, user.salt), user.password_hash):
             return None
 
         return user

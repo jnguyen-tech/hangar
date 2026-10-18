@@ -5,7 +5,7 @@
 # (May 2026).
 #
 # This file doesn't contain any tracking logic. It uses the general tool in
-# prototype.py and supplies the Tinker-specific pieces:
+# maintenance_tracker.py and supplies the Tinker-specific pieces:
 #   * delay categories that match the causes GAO discusses
 #   * the kinds of aircraft that go through depot maintenance at Tinker
 #   * a sample set of jobs and delays

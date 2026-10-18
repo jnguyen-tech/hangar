@@ -1,6 +1,5 @@
-# The mentor's dataset stays off GitHub.
-# It isn't mine to publish, and the raw files are large.
-# See "Getting the data" in README.md.
+# The dataset stays off GitHub because the files are large (about 31 MB cleaned).
+# The live website has its own copy. See "Getting the data" in README.md.
 data/
 
 # Python's cache files (made automatically when a file is imported)
@@ -12,11 +11,11 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Private notes about the dataset (see README "Getting the data")
+# My working notes about the dataset
 DATA_GUIDE.md
 
-# Charts show results from the dataset. Kept private until the mentor approves what can be shown.
+# Chart images (charts.py makes them again any time)
 charts/
 
-# Files downloaded from Claude (may include charts with results)
+# Files downloaded from Claude
 Claude outputs/

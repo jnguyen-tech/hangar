@@ -91,6 +91,10 @@ class Tracker:
 
         Replaces: set_categories() in prototype.py.
         """
+        for event in self.delay_events:
+            if event.category not in new_categories:
+                print(f"Error: '{event.category}' is already used by a delay, so it can't be removed")
+                return
         self.categories.clear()
         for category in new_categories:
             self.categories.append(category)
@@ -143,6 +147,9 @@ class Tracker:
         if self.find_job(job_id) is not None:
             print(f"Error: job {job_id} already exists")
             return
+        if planned_days < 1:
+            print("Error: planned_days must be at least 1")
+            return
 
         job = Job(job_id, asset)
         estimate = Estimate(job_id, 1, planned_days, 0, "original plan", None)
@@ -166,6 +173,9 @@ class Tracker:
             return
         if job.status == "closed":
             print(f"Error: job {job_id} is already closed")
+            return
+        if actual_days < 0:
+            print("Error: actual_days can't be negative")
             return
         job.status = "closed"
         job.actual_days = actual_days
@@ -205,6 +215,13 @@ class Tracker:
 
     def record_post_completion_revision(self, job_id, target_days, created_on_day):
         """Append a revision made AFTER the job finished. It's kept in the history, but marked."""
+        job = self.find_job(job_id)
+        if job is None:
+            print(f"Error: job {job_id} not found")
+            return
+        if job.status != "closed":
+            print(f"Error: job {job_id} hasn't finished, so it can't have a post-completion revision")
+            return
         current = self.get_current_estimate(job_id)
         estimate = Estimate(
             job_id,
