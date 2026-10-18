@@ -6,7 +6,7 @@ John Nguyen, Oklahoma City Community College
 
 A general-purpose tool for tracking maintenance delays honestly: it keeps the original plan on record instead of overwriting it. Its main case study, built from a public GAO report, is depot maintenance delays at Tinker AFB. A second case study on Navy ship maintenance shows the same tool works elsewhere.
 
-> **Try it live:** _link coming soon_
+> **Try it live:** [jnguyentech.pythonanywhere.com](https://jnguyentech.pythonanywhere.com)
 
 > **Status:** Demo / portfolio project. It is not connected to any Air Force, Navy, or other maintenance system, and nothing in this repository is official data or an official measure of performance. The example jobs in the case study files are made up.
 

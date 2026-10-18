@@ -41,7 +41,7 @@ def add_demo_flag():
 @app.route("/")
 def home():
     """The home page."""
-    return render_template("index.html")
+    return render_template("index.html", total=len(tracker.jobs))
 
 
 @app.route("/jobs")

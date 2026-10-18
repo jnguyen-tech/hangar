@@ -22,9 +22,29 @@
     <main>
         <h2>Welcome to Hangar</h2>
         <p>Hangar tracks maintenance delays without overwriting the original plan. Every delay is logged with its cause, and every change to a job's target finish is saved as a new version. So a job can't look on time just because its deadline kept moving.</p>
+
+        <!-- h3 is a smaller heading than h2. -->
+        <h3>Start here</h3>
         {% if demo %}
-        <p>Start with <a href="/jobs/DEMO-0001">job DEMO-0001</a> to see one job's full history, or open the <a href="/reports">reports</a>.</p>
+        <p>Open <a href="/jobs/DEMO-0001">job DEMO-0001</a> to see one job's full history: its original plan, every delay, and every new target.</p>
+        {% else %}
+        <p>Open <a href="/jobs/JOB-0000058">job JOB-0000058</a>. Its original plan was 148 days, and it finished on day 220, 72 days late. But a change made after it finished moved the target to day 220, so its final record says "on time." Hangar keeps every version, so you can see what really happened.</p>
         {% endif %}
+
+        <!-- ul is a bulleted list. Each li is one bullet. -->
+        <ul>
+            <!-- "{:,}".format(total) adds commas, so 50000 shows as 50,000. -->
+            <li><a href="/jobs">Jobs</a>: search all {{ "{:,}".format(total) }} jobs by job ID, asset, or status.</li>
+            <li><a href="/reports">Reports</a>: how many jobs look on time against each target, and what caused the delays.</li>
+        </ul>
+
+        <h3>About this project</h3>
+        {% if demo %}
+        <p>This demo uses 200 made-up jobs.</p>
+        {% else %}
+        <p>The {{ "{:,}".format(total) }} jobs are synthetic (artificial) maintenance data sourced from TFCU, not real records.</p>
+        {% endif %}
+        <p>Hangar is a student portfolio project by John Nguyen at Oklahoma City Community College. It isn't connected to any Air Force or other maintenance system. <a href="https://github.com/jnguyen-tech/hangar">See the code on GitHub</a>.</p>
     </main>
 </body>
 </html>
