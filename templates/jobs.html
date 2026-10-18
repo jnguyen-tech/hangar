@@ -38,9 +38,9 @@
         {% else %}
         <p>
             {% if search %}
-            {{ match_count }} of {{ total }} jobs match "{{ search }}".
+            {{ "{:,}".format(match_count) }} of {{ "{:,}".format(total) }} jobs match "{{ search }}".
             {% else %}
-            {{ total }} jobs in all.
+            {{ "{:,}".format(total) }} jobs in all.
             {% endif %}
             Showing {{ first_number }} to {{ last_number }} (page {{ page }} of {{ total_pages }}).
         </p>
