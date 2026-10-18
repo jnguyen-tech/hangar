@@ -1,3 +1,5 @@
+<img width="1264" height="843" alt="hangar-logo-navy" src="https://github.com/user-attachments/assets/b46c032b-224e-4f53-add9-aed1b9e297e6" />
+
 # Hangar: A Maintenance Delay Tracker
 
 John Nguyen, Oklahoma City Community College
