@@ -150,7 +150,7 @@ Each design decision below traces back to the problems in the case studies.
 
 - Python 3. The tool and the data cleaning use only Python's standard library, so there's nothing to install for them.
 - matplotlib for the charts (`python -m pip install matplotlib`)
-- A synthetic 50,000-job maintenance dataset sourced from TFCU, cleaned with Python's built-in `csv` and `datetime` modules so the tool can be tested at scale (Phase 3)
+- A synthetic 50,000-job maintenance dataset sourced from Tinker Air Force Base, cleaned with Python's built-in `csv` and `datetime` modules so the tool can be tested at scale (Phase 3)
 - SQLite through Python's built-in `sqlite3` module for storage (Phase 5)
 - Password hashing with Python's built-in `hashlib` for the login (Phase 6)
 - Plain HTML, CSS, and JavaScript for the web interface, connected to Python with Flask (`python -m pip install flask`), then React, with CSS and Framer Motion or GSAP for animations (Phase 7)
@@ -200,7 +200,7 @@ maintenance-delay-tracker/
 
 ### Getting the data
 
-The dataset is synthetic (artificial replica data, with no real or sensitive records), sourced from TFCU and shared by my faculty mentor. It isn't included in this repository because the files are large. The website falls back to demo mode without it, and the case studies and the Phase 2 check (`compare_outputs.py`) don't need it.
+The dataset is synthetic (artificial replica data, with no real or sensitive records), sourced from Tinker Air Force Base and shared by my faculty mentor. It isn't included in this repository because the files are large. The website falls back to demo mode without it, and the case studies and the Phase 2 check (`compare_outputs.py`) don't need it.
 
 To run the cleaning code, put the dataset's files in `data/raw/`:
 
@@ -227,7 +227,7 @@ python charts.py
 
 ## Progress
 
-Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A synthetic 50,000-job maintenance dataset sourced from TFCU has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). The login system works from the command line: accounts with hashed passwords, three roles, a permission check before every action, and every delay stamped with who logged it (Phase 6). The website runs with Flask: a job list that searches all 50,000 jobs, a page for each job, and the reports, plus a demo mode with made-up jobs (Phase 7). The Scholar's Day abstract is submitted and the poster is in final edits. The site is live at [jnguyentech.pythonanywhere.com](https://jnguyentech.pythonanywhere.com), and forms for opening jobs, logging delays, and closing jobs work when it runs locally. Next come a login page on the website and the SQLite database, so changes are saved for good. See [ROADMAP.md](ROADMAP.md) for the full checklist.
+Phases 1 through 4 are complete. The plain-Python tool works (Phase 1), and it has been rewritten with classes in `maintenance_tracker.py`, with output that matches the original line for line (Phase 2). A synthetic 50,000-job maintenance dataset sourced from Tinker Air Force Base has been cleaned in `cleaning.py` and loaded into the tracker with `load_data.py` (Phase 3). As a check, the tracker rebuilt the dataset's full estimate history from only the original plans and the logged delays, and all 182,403 estimates matched. `charts.py` draws the three result charts (Phase 4). The login system works from the command line: accounts with hashed passwords, three roles, a permission check before every action, and every delay stamped with who logged it (Phase 6). The website runs with Flask: a job list that searches all 50,000 jobs, a page for each job, and the reports, plus a demo mode with made-up jobs (Phase 7). The Scholar's Day abstract is submitted and the poster is in final edits. The site is live at [jnguyentech.pythonanywhere.com](https://jnguyentech.pythonanywhere.com), and forms for opening jobs, logging delays, and closing jobs work when it runs locally. Next come a login page on the website and the SQLite database, so changes are saved for good. See [ROADMAP.md](ROADMAP.md) for the full checklist.
 
 ## Presenting this project
 
