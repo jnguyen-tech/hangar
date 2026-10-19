@@ -4,22 +4,27 @@
 # Then open http://127.0.0.1:5000 in your browser.
 
 import os
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, session
 from load_data import load_tracker, CLEAN_FOLDER
 from charts import count_on_time
 from maintenance_tracker import percent
 from demo_data import load_demo_tracker
+from accounts import USERS_FILE, load_accounts, can
 
 app = Flask(__name__)
 
+# Flask remembers who is logged in with a "session" cookie in the browser.
+# The secret key signs that cookie so nobody can fake it. It must never be
+# on GitHub, so it comes from the server's settings (on PythonAnywhere, the
+# WSGI file). If it isn't set, a random one is made, which works but logs
+# everyone out whenever the site restarts.
+app.secret_key = os.environ.get("HANGAR_SECRET_KEY", os.urandom(32))
+
+# "Lax" stops other websites from sending forms here using your login.
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
 # How many jobs to show on one page of the Jobs table.
 JOBS_PER_PAGE = 100
-
-# Can people add jobs, log delays, and close jobs from the website?
-# It starts False, so the public website is read-only.
-# The last lines of this file switch it to True, but only when YOU run
-# "python app.py" on your own computer. (A web host skips those lines.)
-ALLOW_EDITS = False
 
 # Use the 50,000-job dataset if its clean files are here.
 # If they aren't (for example, someone downloaded the code from GitHub,
@@ -37,11 +42,34 @@ else:
     tracker = load_tracker()
 print("Loaded", len(tracker.jobs), "jobs")
 
+# The website's logins, from users.csv (made by add_user.py).
+accounts = load_accounts(USERS_FILE)
+print("Loaded", len(accounts.users), "accounts")
+
+
+def current_user():
+    """Return the logged-in User, or None if nobody is logged in."""
+    # session works like a dictionary that lasts between pages for one browser.
+    username = session.get("username")
+    if username is None:
+        return None
+    user = accounts.find_user(username)
+    if user is None or not user.active:
+        return None
+    return user
+
 
 @app.context_processor
 def add_page_flags():
-    """Let every page know if this is the demo (for the banner) and if editing is on (for the forms)."""
-    return {"demo": DEMO, "allow_edits": ALLOW_EDITS}
+    """Give every page: the demo flag, who is logged in, and what they're allowed to do."""
+    user = current_user()
+    return {
+        "demo": DEMO,
+        "user": user,
+        "can_open_job": can(user, "open_job"),
+        "can_log_delay": can(user, "log_delay"),
+        "can_close_job": can(user, "close_job"),
+    }
 
 
 def whole_number(text):
@@ -167,6 +195,7 @@ def job_page(job_id):
             "category": event.category,
             "days_added": event.days_added,
             "description": event.description,
+            "logged_by": getattr(event, "logged_by", None),
         })
 
     return render_template(
@@ -184,7 +213,7 @@ def job_page(job_id):
 
 
 # ---------------------------------------------------------------------------
-# Forms that change the data. Each one only works when ALLOW_EDITS is True.
+# Forms that change the data. Each one checks the logged-in user's role first.
 # Changes live in memory, so they're gone when the site restarts.
 # (Saving them for good is the database step, later.)
 # ---------------------------------------------------------------------------
@@ -193,8 +222,8 @@ def job_page(job_id):
 def new_job():
     """GET shows the empty form. POST is what happens when you press "Open job"."""
     # Hiding the form isn't enough: someone could still send data to this
-    # address. So the route itself refuses (403 means "not allowed").
-    if not ALLOW_EDITS:
+    # address. So the route itself checks (403 means "not allowed").
+    if not can(current_user(), "open_job"):
         abort(403)
 
     error = None
@@ -224,7 +253,8 @@ def new_job():
 @app.route("/jobs/<job_id>/delay", methods=["POST"])
 def add_delay(job_id):
     """Log a delay on an open job. This adds a new estimate version too."""
-    if not ALLOW_EDITS:
+    user = current_user()
+    if not can(user, "log_delay"):
         abort(403)
 
     day = whole_number(request.form["day"])
@@ -237,7 +267,9 @@ def add_delay(job_id):
     elif description == "":
         error = "Please describe what caused the delay."
     else:
-        error = tracker.log_delay(job_id, day, category, description, days_added)
+        # logged_by stamps the delay with who entered it.
+        error = tracker.log_delay(job_id, day, category, description, days_added,
+                                  logged_by=user.username)
 
     # Go back to the job's page either way. If something went wrong,
     # put the message in the address so the page can show it.
@@ -249,7 +281,7 @@ def add_delay(job_id):
 @app.route("/jobs/<job_id>/close", methods=["POST"])
 def close_job(job_id):
     """Close an open job and record how many days it really took."""
-    if not ALLOW_EDITS:
+    if not can(current_user(), "close_job"):
         abort(403)
 
     actual_days = whole_number(request.form["actual_days"])
@@ -261,6 +293,35 @@ def close_job(job_id):
     if error is None:
         return redirect(url_for("job_page", job_id=job_id))
     return redirect(url_for("job_page", job_id=job_id, error=error))
+
+
+# ---------------------------------------------------------------------------
+# Logging in and out
+# ---------------------------------------------------------------------------
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """GET shows the login form. POST checks the username and password."""
+    error = None
+    if request.method == "POST":
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        user = accounts.login(username, password)
+        if user is None:
+            # Same message either way, so nobody can learn which usernames exist.
+            error = "Wrong username or password."
+        else:
+            session.clear()
+            session["username"] = user.username
+            return redirect(url_for("home"))
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+def logout():
+    """Forget who was logged in, then go back to the home page."""
+    session.clear()
+    return redirect(url_for("home"))
 
 
 @app.route("/reports")
@@ -301,5 +362,4 @@ def reports():
 # handy while building. A web host like PythonAnywhere starts the site its own
 # way and skips this part, so debug mode is never on for the public site.
 if __name__ == "__main__":
-    ALLOW_EDITS = True    # editing forms are on, on your computer only
     app.run(debug=True)

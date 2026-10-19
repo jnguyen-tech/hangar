@@ -19,3 +19,6 @@ charts/
 
 # Files downloaded from Claude
 Claude outputs/
+
+# Website logins (usernames, roles, and password hashes). Made by add_user.py.
+users.csv

@@ -16,8 +16,15 @@
             <a href="/">Home</a>
             <a href="/jobs">Jobs</a>
             <a href="/reports">Reports</a>
-            {% if allow_edits %}
+            {% if can_open_job %}
             <a href="/jobs/new">New job</a>
+            {% endif %}
+            <!-- "user" is the logged-in person, or nothing if nobody is logged in. -->
+            {% if user %}
+            <span class="signed-in">{{ user.username }} ({{ user.role }})</span>
+            <a href="/logout">Log out</a>
+            {% else %}
+            <a href="/login">Log in</a>
             {% endif %}
         </nav>
     </header>

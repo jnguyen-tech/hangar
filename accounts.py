@@ -1,9 +1,15 @@
 # accounts.py
 # Phase 6: user accounts and roles for the maintenance delay tracker.
 
+import csv
 import hashlib
 import hmac
 import os
+
+# The website's accounts are saved here: usernames, roles, and password HASHES.
+# Never the passwords themselves. This file is in .gitignore, so it stays off GitHub.
+PROJECT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+USERS_FILE = os.path.join(PROJECT_FOLDER, "users.csv")
 
 ROLES = ["employee", "manager", "admin"]
 MINIMUM_PASSWORD_LENGTH = 8
@@ -60,18 +66,29 @@ class Accounts:
         return None
 
     def create_user(self, username, role, password):
-        """Add a new account, after checking the username, the role, and the password."""
+        """Add a new account, after checking the username, the role, and the password.
+
+        Returns an error message if something is wrong, or None if it worked.
+        """
+        if username == "":
+            message = "Error: username can't be blank"
+            print(message)
+            return message
+
         if self.find_user(username) is not None:
-            print(f"Error: user {username} already exists")
-            return
+            message = f"Error: user {username} already exists"
+            print(message)
+            return message
 
         if role not in ROLES:
-            print(f"Error: '{role}' is not a valid role. Use one of: {ROLES}")
-            return
+            message = f"Error: '{role}' is not a valid role. Use one of: {ROLES}"
+            print(message)
+            return message
 
         if len(password) < MINIMUM_PASSWORD_LENGTH:
-            print(f"Error: password must be at least {MINIMUM_PASSWORD_LENGTH} characters")
-            return
+            message = f"Error: password must be at least {MINIMUM_PASSWORD_LENGTH} characters"
+            print(message)
+            return message
 
         salt = os.urandom(16)
         password_hash = hash_password(password, salt)
@@ -102,6 +119,35 @@ class Accounts:
 
         user.active = False
         print(f"Deactivated account: {username}")
+
+def save_accounts(accounts, filename):
+    """Write every account to a CSV file, one row per user.
+
+    The salt is bytes, so .hex() turns it into text that fits in a CSV.
+    """
+    file = open(filename, "w", newline="", encoding="utf-8")
+    writer = csv.writer(file)
+    writer.writerow(["username", "role", "salt", "password_hash", "active"])
+    for user in accounts.users.values():
+        writer.writerow([user.username, user.role, user.salt.hex(), user.password_hash, user.active])
+    file.close()
+
+
+def load_accounts(filename):
+    """Read the accounts back from the CSV file. No file yet means no accounts yet."""
+    accounts = Accounts()
+    if not os.path.exists(filename):
+        return accounts
+
+    file = open(filename, encoding="utf-8")
+    for row in csv.DictReader(file):
+        # bytes.fromhex() turns the salt text back into bytes.
+        user = User(row["username"], row["role"], row["password_hash"], bytes.fromhex(row["salt"]))
+        user.active = (row["active"] == "True")
+        accounts.users[user.username] = user
+    file.close()
+    return accounts
+
 
 if __name__ == "__main__":
     # Step 1 test: create accounts and look them up.

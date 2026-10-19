@@ -16,8 +16,15 @@
             <a href="/">Home</a>
             <a href="/jobs">Jobs</a>
             <a href="/reports">Reports</a>
-            {% if allow_edits %}
+            {% if can_open_job %}
             <a href="/jobs/new">New job</a>
+            {% endif %}
+            <!-- "user" is the logged-in person, or nothing if nobody is logged in. -->
+            {% if user %}
+            <span class="signed-in">{{ user.username }} ({{ user.role }})</span>
+            <a href="/logout">Log out</a>
+            {% else %}
+            <a href="/login">Log in</a>
             {% endif %}
         </nav>
     </header>
@@ -89,6 +96,7 @@
                 <th>Cause</th>
                 <th>Days added</th>
                 <th>Description</th>
+                <th>Logged by</th>
             </tr>
             {% for row in delays %}
             <tr>
@@ -96,12 +104,17 @@
                 <td>{{ row.category }}</td>
                 <td>{{ row.days_added }}</td>
                 <td>{{ row.description }}</td>
+                <td>{{ row.logged_by or "" }}</td>
             </tr>
             {% endfor %}
         </table>
 
-        <!-- These two forms only show for an OPEN job, and only when editing is on. -->
-        {% if allow_edits and job.status == "open" %}
+        <!-- The forms only show for an OPEN job, and only to someone whose role allows it. -->
+        {% if job.status == "open" and not user %}
+        <p class="note"><a href="/login">Log in</a> to log delays on this job.</p>
+        {% endif %}
+
+        {% if job.status == "open" and can_log_delay %}
 
         <!-- method="post" sends the typed data to the address in action="...".
              app.py reads it with request.form. -->
@@ -129,7 +142,9 @@
             <button type="submit">Log delay</button>
             <p class="note">This adds a new estimate version. The old ones stay on record.</p>
         </form>
+        {% endif %}
 
+        {% if job.status == "open" and can_close_job %}
         <form action="/jobs/{{ job.job_id }}/close" method="post" class="edit-form">
             <h3>Close this job</h3>
             <label for="actual_days">Finished in (days)</label>

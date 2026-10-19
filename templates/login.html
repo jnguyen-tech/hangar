@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log in - Hangar</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    {% if demo %}
+    <p class="demo-banner">Demo version: every job on this site is made-up sample data.</p>
+    {% endif %}
+    <header>
+        <h1><img src="/static/hangar-logo-navy.png" alt="Hangar" class="logo"></h1>
+        <p>Keeps the original plan on record, so a job can't look on time just because its deadline moved.</p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/jobs">Jobs</a>
+            <a href="/reports">Reports</a>
+            {% if can_open_job %}
+            <a href="/jobs/new">New job</a>
+            {% endif %}
+            <!-- "user" is the logged-in person, or nothing if nobody is logged in. -->
+            {% if user %}
+            <span class="signed-in">{{ user.username }} ({{ user.role }})</span>
+            <a href="/logout">Log out</a>
+            {% else %}
+            <a href="/login">Log in</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <h2>Log in</h2>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="post" class="edit-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+
+            <!-- type="password" shows dots instead of the letters you type. -->
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Log in</button>
+        </form>
+
+        <p class="note">Accounts are made by the site owner with add_user.py. Anyone can view jobs and reports without logging in.</p>
+    </main>
+</body>
+</html>

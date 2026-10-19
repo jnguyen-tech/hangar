@@ -157,3 +157,9 @@ tr:hover td {
     color: #555555;
     font-size: 14px;
 }
+
+/* "username (role)" in the header when someone is logged in */
+.signed-in {
+    margin-right: 16px;
+    color: var(--blue);
+}
