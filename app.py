@@ -4,7 +4,7 @@
 # Then open http://127.0.0.1:5000 in your browser.
 
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, abort
 from load_data import load_tracker, CLEAN_FOLDER
 from charts import count_on_time
 from maintenance_tracker import percent
@@ -14,6 +14,12 @@ app = Flask(__name__)
 
 # How many jobs to show on one page of the Jobs table.
 JOBS_PER_PAGE = 100
+
+# Can people add jobs, log delays, and close jobs from the website?
+# It starts False, so the public website is read-only.
+# The last lines of this file switch it to True, but only when YOU run
+# "python app.py" on your own computer. (A web host skips those lines.)
+ALLOW_EDITS = False
 
 # Use the 50,000-job dataset if its clean files are here.
 # If they aren't (for example, someone downloaded the code from GitHub,
@@ -33,9 +39,21 @@ print("Loaded", len(tracker.jobs), "jobs")
 
 
 @app.context_processor
-def add_demo_flag():
-    """Let every page know whether this is the demo, so it can show the banner."""
-    return {"demo": DEMO}
+def add_page_flags():
+    """Let every page know if this is the demo (for the banner) and if editing is on (for the forms)."""
+    return {"demo": DEMO, "allow_edits": ALLOW_EDITS}
+
+
+def whole_number(text):
+    """Turn form text like "12" into the number 12.
+
+    Everything typed into a form arrives as text. If the text isn't a
+    whole number (like "abc", "-3", or "2.5"), return None instead.
+    """
+    text = text.strip()
+    if text.isdigit():
+        return int(text)
+    return None
 
 
 @app.route("/")
@@ -153,6 +171,8 @@ def job_page(job_id):
 
     return render_template(
         "job.html",
+        error=request.args.get("error"),
+        categories=tracker.categories,
         job=job,
         original=original,
         last_regular=last_regular,
@@ -161,6 +181,86 @@ def job_page(job_id):
         history=history,
         delays=delays,
     )
+
+
+# ---------------------------------------------------------------------------
+# Forms that change the data. Each one only works when ALLOW_EDITS is True.
+# Changes live in memory, so they're gone when the site restarts.
+# (Saving them for good is the database step, later.)
+# ---------------------------------------------------------------------------
+
+@app.route("/jobs/new", methods=["GET", "POST"])
+def new_job():
+    """GET shows the empty form. POST is what happens when you press "Open job"."""
+    # Hiding the form isn't enough: someone could still send data to this
+    # address. So the route itself refuses (403 means "not allowed").
+    if not ALLOW_EDITS:
+        abort(403)
+
+    error = None
+    if request.method == "POST":
+        # request.form holds what was typed, by each input's name="...".
+        job_id = request.form["job_id"].strip().upper()
+        asset = request.form["asset"].strip()
+        planned_days = whole_number(request.form["planned_days"])
+
+        if job_id == "" or asset == "":
+            error = "Please fill in the job ID and the asset."
+        elif not job_id.replace("-", "").isalnum():
+            error = "Job IDs can only use letters, numbers, and dashes, like NEW-0001."
+        elif planned_days is None:
+            error = "Planned days must be a whole number, like 120."
+        else:
+            # create_job returns an error message, or None if it worked.
+            error = tracker.create_job(job_id, asset, planned_days)
+
+        if error is None:
+            # It worked, so send the browser to the new job's page.
+            return redirect(url_for("job_page", job_id=job_id))
+
+    return render_template("new_job.html", error=error, form=request.form)
+
+
+@app.route("/jobs/<job_id>/delay", methods=["POST"])
+def add_delay(job_id):
+    """Log a delay on an open job. This adds a new estimate version too."""
+    if not ALLOW_EDITS:
+        abort(403)
+
+    day = whole_number(request.form["day"])
+    days_added = whole_number(request.form["days_added"])
+    category = request.form["category"]
+    description = request.form["description"].strip()
+
+    if day is None or days_added is None:
+        error = "Day logged and days added must be whole numbers."
+    elif description == "":
+        error = "Please describe what caused the delay."
+    else:
+        error = tracker.log_delay(job_id, day, category, description, days_added)
+
+    # Go back to the job's page either way. If something went wrong,
+    # put the message in the address so the page can show it.
+    if error is None:
+        return redirect(url_for("job_page", job_id=job_id))
+    return redirect(url_for("job_page", job_id=job_id, error=error))
+
+
+@app.route("/jobs/<job_id>/close", methods=["POST"])
+def close_job(job_id):
+    """Close an open job and record how many days it really took."""
+    if not ALLOW_EDITS:
+        abort(403)
+
+    actual_days = whole_number(request.form["actual_days"])
+    if actual_days is None:
+        error = "Finished in must be a whole number of days."
+    else:
+        error = tracker.close_job(job_id, actual_days)
+
+    if error is None:
+        return redirect(url_for("job_page", job_id=job_id))
+    return redirect(url_for("job_page", job_id=job_id, error=error))
 
 
 @app.route("/reports")
@@ -201,4 +301,5 @@ def reports():
 # handy while building. A web host like PythonAnywhere starts the site its own
 # way and skips this part, so debug mode is never on for the public site.
 if __name__ == "__main__":
+    ALLOW_EDITS = True    # editing forms are on, on your computer only
     app.run(debug=True)

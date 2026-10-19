@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New job - Hangar</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    {% if demo %}
+    <p class="demo-banner">Demo version: every job on this site is made-up sample data.</p>
+    {% endif %}
+    <header>
+        <h1><img src="/static/hangar-logo-navy.png" alt="Hangar" class="logo"></h1>
+        <p>Keeps the original plan on record, so a job can't look on time just because its deadline moved.</p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/jobs">Jobs</a>
+            <a href="/reports">Reports</a>
+            {% if allow_edits %}
+            <a href="/jobs/new">New job</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <h2>Open a new job</h2>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <!-- No action="..." means the form sends to this same page: /jobs/new.
+             value="{{ form.job_id }}" refills what you typed if there was an error. -->
+        <form method="post" class="edit-form">
+            <label for="job_id">Job ID</label>
+            <input type="text" id="job_id" name="job_id" value="{{ form.job_id }}" placeholder="NEW-0001" required>
+
+            <label for="asset">Asset</label>
+            <input type="text" id="asset" name="asset" value="{{ form.asset }}" placeholder="B-52H" required>
+
+            <label for="planned_days">Planned days (the original target)</label>
+            <input type="number" id="planned_days" name="planned_days" value="{{ form.planned_days }}" min="1" required>
+
+            <button type="submit">Open job</button>
+            <p class="note">The planned days become version 1 of the target, and that version is never changed.</p>
+        </form>
+
+        <p class="note">Changes are kept until the website restarts. Saving them for good comes with the database.</p>
+    </main>
+</body>
+</html>

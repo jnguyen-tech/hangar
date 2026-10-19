@@ -16,12 +16,19 @@
             <a href="/">Home</a>
             <a href="/jobs">Jobs</a>
             <a href="/reports">Reports</a>
+            {% if allow_edits %}
+            <a href="/jobs/new">New job</a>
+            {% endif %}
         </nav>
     </header>
 
     <main>
         <h2>{{ job.job_id }}</h2>
         <p>Asset: {{ job.asset }}. Status: {{ job.status }}.</p>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
 
         <h3>Targets</h3>
         <table>
@@ -43,7 +50,13 @@
             </tr>
             <tr>
                 <td>Actually finished in</td>
-                <td>{{ job.actual_days }}</td>
+                <td>
+                    {% if job.actual_days is none %}
+                    not finished yet
+                    {% else %}
+                    {{ job.actual_days }}
+                    {% endif %}
+                </td>
             </tr>
             <tr>
                 <td>Days late against the original target</td>
@@ -86,6 +99,45 @@
             </tr>
             {% endfor %}
         </table>
+
+        <!-- These two forms only show for an OPEN job, and only when editing is on. -->
+        {% if allow_edits and job.status == "open" %}
+
+        <!-- method="post" sends the typed data to the address in action="...".
+             app.py reads it with request.form. -->
+        <form action="/jobs/{{ job.job_id }}/delay" method="post" class="edit-form">
+            <h3>Log a delay</h3>
+
+            <label for="day">Day logged (days since the job opened)</label>
+            <!-- type="number" shows a number box; min="0" stops negatives. -->
+            <input type="number" id="day" name="day" min="0" required>
+
+            <label for="category">Cause</label>
+            <!-- A select is a drop-down list. Each option is one choice. -->
+            <select id="category" name="category">
+                {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="days_added">Days added</label>
+            <input type="number" id="days_added" name="days_added" min="1" required>
+
+            <label for="description">What happened?</label>
+            <input type="text" id="description" name="description" size="50" required>
+
+            <button type="submit">Log delay</button>
+            <p class="note">This adds a new estimate version. The old ones stay on record.</p>
+        </form>
+
+        <form action="/jobs/{{ job.job_id }}/close" method="post" class="edit-form">
+            <h3>Close this job</h3>
+            <label for="actual_days">Finished in (days)</label>
+            <input type="number" id="actual_days" name="actual_days" min="0" required>
+            <button type="submit">Close job</button>
+        </form>
+
+        {% endif %}
 
         <p><a href="/jobs">Back to all jobs</a></p>
     </main>

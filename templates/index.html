@@ -16,6 +16,9 @@
             <a href="/">Home</a>
             <a href="/jobs">Jobs</a>
             <a href="/reports">Reports</a>
+            {% if allow_edits %}
+            <a href="/jobs/new">New job</a>
+            {% endif %}
         </nav>
     </header>
 

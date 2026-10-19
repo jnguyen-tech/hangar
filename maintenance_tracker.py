@@ -140,16 +140,21 @@ class Tracker:
     def create_job(self, job_id, asset, planned_days):
         """Open a new job and record its ORIGINAL estimate as version 1.
 
+        If something is wrong, it prints an error and also RETURNS the message,
+        so the website can show it. If it works, it returns None.
+
         Replaces: create_job() in prototype.py.
         Hint: jobs.append({...}) becomes self.jobs.append(Job(job_id, asset))
         and the first estimate becomes an Estimate(...) object.
         """
         if self.find_job(job_id) is not None:
-            print(f"Error: job {job_id} already exists")
-            return
+            message = f"Error: job {job_id} already exists"
+            print(message)
+            return message
         if planned_days < 1:
-            print("Error: planned_days must be at least 1")
-            return
+            message = "Error: planned_days must be at least 1"
+            print(message)
+            return message
 
         job = Job(job_id, asset)
         estimate = Estimate(job_id, 1, planned_days, 0, "original plan", None)
@@ -165,18 +170,23 @@ class Tracker:
     def close_job(self, job_id, actual_days):
         """Mark a job closed and record how long it actually took.
 
+        Returns an error message if something is wrong, or None if it worked.
+
         Replaces: close_job() in prototype.py.
         """
         job = self.find_job(job_id)
         if job is None:
-            print(f"Error: job {job_id} not found")
-            return
+            message = f"Error: job {job_id} not found"
+            print(message)
+            return message
         if job.status == "closed":
-            print(f"Error: job {job_id} is already closed")
-            return
+            message = f"Error: job {job_id} is already closed"
+            print(message)
+            return message
         if actual_days < 0:
-            print("Error: actual_days can't be negative")
-            return
+            message = "Error: actual_days can't be negative"
+            print(message)
+            return message
         job.status = "closed"
         job.actual_days = actual_days
         if not self.quiet:
@@ -258,23 +268,30 @@ class Tracker:
         return self.delays_by_job[job_id]
 
     def log_delay(self, job_id, logged_on_day, category, description, days_added, event_id=None, logged_by=None):
-        """Check the job and category, save a DelayEvent, then revise the estimate."""
+        """Check the job and category, save a DelayEvent, then revise the estimate.
+
+        Returns an error message if something is wrong, or None if it worked.
+        """
         job = self.find_job(job_id)
         if job is None:
-            print(f"Error: job {job_id} not found")
-            return
+            message = f"Error: job {job_id} not found"
+            print(message)
+            return message
 
         if job.status == "closed":
-            print(f"Error: job {job_id} is closed, so no more delays can be logged")
-            return
+            message = f"Error: job {job_id} is closed, so no more delays can be logged"
+            print(message)
+            return message
 
         if days_added < 1:
-            print("Error: days_added must be at least 1")
-            return
+            message = "Error: days_added must be at least 1"
+            print(message)
+            return message
 
         if category not in self.categories:
-            print(f"Error: '{category}' is not a valid category. Use one of: {self.categories}")
-            return
+            message = f"Error: '{category}' is not a valid category. Use one of: {self.categories}"
+            print(message)
+            return message
 
         if event_id is None:
             event_id = len(self.delay_events) + 1

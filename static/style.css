@@ -115,3 +115,45 @@ tr:hover td {
     margin-right: 24px;
     font-weight: bold;
 }
+
+/* Forms for opening a job, logging a delay, and closing a job */
+.edit-form {
+    background: var(--light);
+    padding: 16px 24px;
+    margin: 24px 0;
+}
+
+.edit-form label {
+    display: block;          /* puts each label on its own line */
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.edit-form input,
+.edit-form select {
+    margin-top: 4px;
+    padding: 6px 8px;
+}
+
+.edit-form button {
+    display: block;
+    margin-top: 16px;
+    padding: 8px 16px;
+    background: var(--blue);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+}
+
+/* A red box for error messages */
+.error {
+    background: #FDECEC;
+    border-left: 6px solid #C0392B;
+    padding: 10px 14px;
+}
+
+/* Small gray helper text */
+.note {
+    color: #555555;
+    font-size: 14px;
+}
