@@ -22,3 +22,6 @@ Claude outputs/
 
 # Website logins (usernames, roles, and password hashes). Made by add_user.py.
 users.csv
+
+# The SQLite databases of changes made on the website (made by app.py)
+*.db

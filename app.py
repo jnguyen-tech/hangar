@@ -10,6 +10,7 @@ from charts import count_on_time
 from maintenance_tracker import percent
 from demo_data import load_demo_tracker
 from accounts import USERS_FILE, load_accounts, can
+import database
 
 app = Flask(__name__)
 
@@ -41,6 +42,16 @@ if DEMO:
 else:
     tracker = load_tracker()
 print("Loaded", len(tracker.jobs), "jobs")
+
+# Changes made on the website are saved in a SQLite database (see database.py).
+# Demo mode gets its own file, so made-up jobs never mix with the real ones.
+if DEMO:
+    DB_FILE = database.DEMO_DB
+else:
+    DB_FILE = database.MAIN_DB
+database.create_tables(DB_FILE)
+replayed = database.replay_history(DB_FILE, tracker)
+print("Replayed", replayed, "saved changes from", os.path.basename(DB_FILE))
 
 # The website's logins, from users.csv (made by add_user.py).
 accounts = load_accounts(USERS_FILE)
@@ -214,8 +225,8 @@ def job_page(job_id):
 
 # ---------------------------------------------------------------------------
 # Forms that change the data. Each one checks the logged-in user's role first.
-# Changes live in memory, so they're gone when the site restarts.
-# (Saving them for good is the database step, later.)
+# The tracker checks the details. If it accepts the change, it's also saved
+# to the database, so it's still there after the site restarts.
 # ---------------------------------------------------------------------------
 
 @app.route("/jobs/new", methods=["GET", "POST"])
@@ -223,7 +234,8 @@ def new_job():
     """GET shows the empty form. POST is what happens when you press "Open job"."""
     # Hiding the form isn't enough: someone could still send data to this
     # address. So the route itself checks (403 means "not allowed").
-    if not can(current_user(), "open_job"):
+    user = current_user()
+    if not can(user, "open_job"):
         abort(403)
 
     error = None
@@ -244,6 +256,7 @@ def new_job():
             error = tracker.create_job(job_id, asset, planned_days)
 
         if error is None:
+            database.save_opened_job(DB_FILE, job_id, asset, planned_days, user.username)
             # It worked, so send the browser to the new job's page.
             return redirect(url_for("job_page", job_id=job_id))
 
@@ -270,6 +283,8 @@ def add_delay(job_id):
         # logged_by stamps the delay with who entered it.
         error = tracker.log_delay(job_id, day, category, description, days_added,
                                   logged_by=user.username)
+        if error is None:
+            database.save_delay(DB_FILE, job_id, day, category, description, days_added, user.username)
 
     # Go back to the job's page either way. If something went wrong,
     # put the message in the address so the page can show it.
@@ -281,7 +296,8 @@ def add_delay(job_id):
 @app.route("/jobs/<job_id>/close", methods=["POST"])
 def close_job(job_id):
     """Close an open job and record how many days it really took."""
-    if not can(current_user(), "close_job"):
+    user = current_user()
+    if not can(user, "close_job"):
         abort(403)
 
     actual_days = whole_number(request.form["actual_days"])
@@ -289,6 +305,8 @@ def close_job(job_id):
         error = "Finished in must be a whole number of days."
     else:
         error = tracker.close_job(job_id, actual_days)
+        if error is None:
+            database.save_closed_job(DB_FILE, job_id, actual_days, user.username)
 
     if error is None:
         return redirect(url_for("job_page", job_id=job_id))
