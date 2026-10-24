@@ -98,6 +98,11 @@
                 <th>Description</th>
                 <th>Logged by</th>
             </tr>
+            {% if not delays %}
+            <tr>
+                <td colspan="5">No delays logged yet.</td>
+            </tr>
+            {% endif %}
             {% for row in delays %}
             <tr>
                 <td>{{ row.day }}</td>
@@ -137,7 +142,7 @@
             <input type="number" id="days_added" name="days_added" min="1" required>
 
             <label for="description">What happened?</label>
-            <input type="text" id="description" name="description" size="50" required>
+            <input type="text" id="description" name="description" size="50" maxlength="200" required>
 
             <button type="submit">Log delay</button>
             <p class="note">This adds a new estimate version. The old ones stay on record.</p>

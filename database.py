@@ -56,18 +56,27 @@ CREATE TABLE IF NOT EXISTS jobs_closed (
 );
 """
 
-# A trigger is a rule the database runs by itself. These run BEFORE any
-# UPDATE or DELETE on the three tables and cancel it with an error.
-# This is the "database that blocks edits and deletes to history."
-TRIGGERS = ""
-for table in ["jobs_opened", "delays_logged", "jobs_closed"]:
-    for action in ["UPDATE", "DELETE"]:
-        TRIGGERS += f"""
-CREATE TRIGGER IF NOT EXISTS no_{action.lower()}_{table}
-BEFORE {action} ON {table}
-BEGIN
-    SELECT RAISE(ABORT, 'History is append-only: rows in {table} can''t be changed or deleted');
-END;
+# A trigger is a rule the database runs by itself. Each one below runs
+# BEFORE an UPDATE (a change) or a DELETE on one table and cancels it with
+# an error. This is the "database that blocks edits and deletes to history."
+TRIGGERS = """
+CREATE TRIGGER IF NOT EXISTS no_update_jobs_opened BEFORE UPDATE ON jobs_opened
+BEGIN SELECT RAISE(ABORT, 'History is append-only: jobs_opened rows cannot be changed'); END;
+
+CREATE TRIGGER IF NOT EXISTS no_delete_jobs_opened BEFORE DELETE ON jobs_opened
+BEGIN SELECT RAISE(ABORT, 'History is append-only: jobs_opened rows cannot be deleted'); END;
+
+CREATE TRIGGER IF NOT EXISTS no_update_delays_logged BEFORE UPDATE ON delays_logged
+BEGIN SELECT RAISE(ABORT, 'History is append-only: delays_logged rows cannot be changed'); END;
+
+CREATE TRIGGER IF NOT EXISTS no_delete_delays_logged BEFORE DELETE ON delays_logged
+BEGIN SELECT RAISE(ABORT, 'History is append-only: delays_logged rows cannot be deleted'); END;
+
+CREATE TRIGGER IF NOT EXISTS no_update_jobs_closed BEFORE UPDATE ON jobs_closed
+BEGIN SELECT RAISE(ABORT, 'History is append-only: jobs_closed rows cannot be changed'); END;
+
+CREATE TRIGGER IF NOT EXISTS no_delete_jobs_closed BEFORE DELETE ON jobs_closed
+BEGIN SELECT RAISE(ABORT, 'History is append-only: jobs_closed rows cannot be deleted'); END;
 """
 
 

@@ -90,7 +90,9 @@ def whole_number(text):
     whole number (like "abc", "-3", or "2.5"), return None instead.
     """
     text = text.strip()
-    if text.isdigit():
+    # isdecimal() is True only for plain digits like "120".
+    # (isdigit() also says True for things like "²", which int() can't read.)
+    if text.isdecimal():
         return int(text)
     return None
 
@@ -112,9 +114,8 @@ def job_list():
 
     # The page number arrives as text, so turn it into a whole number.
     # If someone types something odd like page=abc, just use page 1.
-    if page.isdigit() and int(page) >= 1:
-        page = int(page)
-    else:
+    page = whole_number(page)
+    if page is None or page < 1:
         page = 1
 
     # Step 1: find every job that matches the search.
@@ -206,7 +207,7 @@ def job_page(job_id):
             "category": event.category,
             "days_added": event.days_added,
             "description": event.description,
-            "logged_by": getattr(event, "logged_by", None),
+            "logged_by": event.logged_by,
         })
 
     return render_template(
@@ -247,6 +248,8 @@ def new_job():
 
         if job_id == "" or asset == "":
             error = "Please fill in the job ID and the asset."
+        elif len(job_id) > 20 or len(asset) > 30:
+            error = "Job IDs can be up to 20 characters, and assets up to 30."
         elif not job_id.replace("-", "").isalnum():
             error = "Job IDs can only use letters, numbers, and dashes, like NEW-0001."
         elif planned_days is None:
@@ -279,6 +282,8 @@ def add_delay(job_id):
         error = "Day logged and days added must be whole numbers."
     elif description == "":
         error = "Please describe what caused the delay."
+    elif len(description) > 200:
+        error = "Please keep the description under 200 characters."
     else:
         # logged_by stamps the delay with who entered it.
         error = tracker.log_delay(job_id, day, category, description, days_added,
