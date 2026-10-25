@@ -110,6 +110,27 @@ class Accounts:
 
         return user
 
+    def change_password(self, username, new_password):
+        """Give an existing account a new password.
+
+        Returns an error message if something is wrong, or None if it worked.
+        """
+        user = self.find_user(username)
+        if user is None:
+            message = f"Error: user {username} not found"
+            print(message)
+            return message
+
+        if len(new_password) < MINIMUM_PASSWORD_LENGTH:
+            message = f"Error: password must be at least {MINIMUM_PASSWORD_LENGTH} characters"
+            print(message)
+            return message
+
+        # A brand-new salt each time, so the new hash looks nothing like the old one.
+        user.salt = os.urandom(16)
+        user.password_hash = hash_password(new_password, user.salt)
+        print(f"Changed the password for {username}")
+
     def deactivate_user(self, username):
         """Turn an account off. It's kept, not deleted, so old records still show who made them."""
         user = self.find_user(username)

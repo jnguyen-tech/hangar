@@ -184,6 +184,7 @@ maintenance-delay-tracker/
 ├── demo_data.py            # 200 made-up jobs, used when the data files aren't there
 ├── requirements.txt        # the packages the website needs (Flask and matplotlib)
 ├── add_user.py             # makes a website login; saves only the password hash to users.csv
+├── change_password.py      # gives an existing login a new password
 ├── database.py             # saves website changes to SQLite; append-only (edits and deletes are blocked)
 ├── templates/              # the HTML pages: home, job list, one job, new job, log in, reports
 ├── static/                 # style.css (the look) and the Hangar logo
