@@ -4,6 +4,7 @@
 # Then open http://127.0.0.1:5000 in your browser.
 
 import os
+import time
 from flask import Flask, render_template, request, redirect, url_for, abort, session
 from load_data import load_tracker, CLEAN_FOLDER
 from charts import count_on_time
@@ -26,6 +27,13 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 # How many jobs to show on one page of the Jobs table.
 JOBS_PER_PAGE = 100
+
+# Login lockout: after 5 wrong passwords in a row, that account has to wait
+# 10 minutes before it can try again. This stops someone from guessing
+# password after password.
+MAX_LOGIN_TRIES = 5
+LOCKOUT_MINUTES = 10
+failed_logins = {}   # username -> {"count": wrong tries in a row, "locked_until": a time}
 
 # Use the 50,000-job dataset if its clean files are here.
 # If they aren't (for example, someone downloaded the code from GitHub,
@@ -329,11 +337,31 @@ def login():
     if request.method == "POST":
         username = request.form["username"].strip()
         password = request.form["password"]
+
+        # time.time() is the current time in seconds. If this account's
+        # locked_until time is still in the future, it's locked.
+        record = failed_logins.get(username)
+        if record is not None and record["locked_until"] > time.time():
+            error = f"Too many wrong tries. Please wait {LOCKOUT_MINUTES} minutes and try again."
+            return render_template("login.html", error=error)
+
         user = accounts.login(username, password)
         if user is None:
             # Same message either way, so nobody can learn which usernames exist.
             error = "Wrong username or password."
+            # Only count tries for real accounts, so the dictionary stays small.
+            if accounts.find_user(username) is not None:
+                if record is None:
+                    record = {"count": 0, "locked_until": 0}
+                record["count"] = record["count"] + 1
+                if record["count"] >= MAX_LOGIN_TRIES:
+                    record["locked_until"] = time.time() + LOCKOUT_MINUTES * 60
+                    record["count"] = 0
+                failed_logins[username] = record
         else:
+            # Logged in, so forget any earlier wrong tries.
+            if username in failed_logins:
+                del failed_logins[username]
             session.clear()
             session["username"] = user.username
             return redirect(url_for("home"))
