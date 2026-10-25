@@ -57,7 +57,7 @@ All durations are **calendar days**: every day counts, including weekends and ho
 
 No role can rewrite the record, not even an admin. Roles decide who can add to the history, never who can change it. (This is a demo login; real Air Force systems use CAC cards and single sign-on.)
 
-**A web interface**, so the tracker can be used from a browser instead of the command line. The first version runs on plain HTML, CSS, and a little JavaScript, connected to Python with Flask. Run `python app.py`, then open `http://127.0.0.1:5000` to see a home page, a job list with a search across every job and Previous / Next pages, a page for each job's full estimate history and delays, and the reports. It uses the 50,000-job dataset when the data files are present, and otherwise runs in demo mode on 200 made-up jobs from `demo_data.py`, with a banner on every page saying so. Anyone can view jobs and reports. Logging in unlocks forms based on your role: employees can log delays, managers can also open and close jobs, and every delay is stamped with who logged it. Accounts are made with `python add_user.py`, which saves only password hashes to `users.csv` (kept off GitHub). After 5 wrong passwords in a row, an account is locked for 10 minutes, so passwords can't be guessed over and over. After that, the pages get rebuilt in React and then animated, including a timeline that shows a job's target date sliding out with each delay while the original stays pinned. Python keeps handling the logic and the database.
+**A web interface**, so the tracker can be used from a browser instead of the command line. It runs on plain HTML and CSS, connected to Python with Flask. Run `python app.py`, then open `http://127.0.0.1:5000` to see a home page, a job list with a search across every job and Previous / Next pages, a page for each job's full estimate history and delays, and the reports. It uses the 50,000-job dataset when the data files are present, and otherwise runs in demo mode on 200 made-up jobs from `demo_data.py`, with a banner on every page saying so. Anyone can view jobs and reports. Logging in unlocks forms based on your role: employees can log delays, managers can also open and close jobs, and every delay is stamped with who logged it. Accounts are made with `python add_user.py`, which saves only password hashes to `users.csv` (kept off GitHub). After 5 wrong passwords in a row, an account is locked for 10 minutes, so passwords can't be guessed over and over. After that, the pages get rebuilt in React and then animated, including a timeline that shows a job's target date sliding out with each delay while the original stays pinned. Python keeps handling the logic and the database.
 
 ## Running it
 
@@ -153,7 +153,8 @@ Each design decision below traces back to the problems in the case studies.
 - A synthetic 50,000-job maintenance dataset sourced from Tinker Air Force Base, cleaned with Python's built-in `csv` and `datetime` modules so the tool can be tested at scale (Phase 3)
 - SQLite through Python's built-in `sqlite3` module for storage (Phase 5)
 - Password hashing with Python's built-in `hashlib` for the login (Phase 6)
-- Plain HTML, CSS, and JavaScript for the web interface, connected to Python with Flask (`python -m pip install flask`), then React, with CSS and Framer Motion or GSAP for animations (Phase 7)
+- Plain HTML and CSS for the web interface, connected to Python with Flask (`python -m pip install flask`); a React version with animations is planned (Phase 7)
+- Hosted on PythonAnywhere: [jnguyentech.pythonanywhere.com](https://jnguyentech.pythonanywhere.com)
 
 ## Project structure
 

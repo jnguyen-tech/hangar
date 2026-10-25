@@ -2,7 +2,7 @@
 
 The project is **Hangar**, a general maintenance delay tracker, built in phases. Each phase ends with something that runs, and each one builds on the last instead of replacing it.
 
-**Current focus: finishing the tracker**, with Tinker's depot delays (from the GAO report) as the main case study: cleaned data, results, a database, user accounts, and a web interface. The Navy case study already runs (in plain Python) and is on hold until the tracker is finished (Phase 9).
+**Current focus (late Oct 2026): Scholar's Day on Nov 17.** The tracker works end to end and is live: cleaned data, results, a SQLite database, user accounts, and a web interface. Next up is the phone quick-log page, then practicing the pitch. The Navy case study already runs (in plain Python) and is on hold until the tracker is finished (Phase 9).
 
 One rule across every phase: be able to explain every line out loud. Scholar's Day judges score "Depth of Understanding" and will ask questions. If a piece of code can't be explained, it isn't finished yet.
 
@@ -16,10 +16,10 @@ One rule across every phase: be able to explain every line out loud. Scholar's D
 - [x] Reframe the project as a general tool with Tinker as the case study
 - [x] Received a dataset from the mentor (notes kept private, with the data)
 - [x] Replied to the mentor about the dataset
-- [x] Put the project on GitHub, with the dataset excluded ([jnguyen-tech/maintenance-delay-tracker](https://github.com/jnguyen-tech/maintenance-delay-tracker))
+- [x] Put the project on GitHub, with the dataset excluded ([jnguyen-tech/hangar](https://github.com/jnguyen-tech/hangar), public since Oct 2026)
 - [ ] Share the GitHub link and `schema.sql` with the mentor for feedback
 - [x] Met with the mentor about the roadmap. He recommended the login system (admin, employee, manager) and a web interface: plain JavaScript first, then React, then animations.
-- [x] Confirmed with the mentor how the dataset can be described publicly
+- [x] Confirmed with the mentor how the dataset can be described publicly: "synthetic data sourced from Tinker Air Force Base," OK for the poster, website, and GitHub (Oct 2026)
 - [x] Mentor sent a data cleaning guide. Plan: keep `cleaning.py` in plain Python and add the outputs the guide asks for (see the end of Phase 3)
 
 ## Phase 1 — Plain-Python prototype ✅
@@ -99,7 +99,8 @@ Move the data from in-memory lists into a real database file, using Python's bui
 - [ ] Add a `users` table, and a `logged_by` column on delays and estimates so every entry records who made it (needed for Phase 6)
 - [ ] Write `db.py`: create the tables from `schema.sql`, then rewrite `create_job`, `log_delay`, `close_job`, and the reports to use SQL
 - [ ] Load the cleaned data into the database
-- [ ] Confirm the database blocks edits and deletes to history (the append-only triggers)
+- [x] Confirm the database blocks edits and deletes to history (the append-only triggers)
+- [x] `database.py`: every change made on the website (jobs opened, delays logged, jobs closed) is saved in SQLite with who did it and when, and replayed when the site starts. Triggers refuse any `UPDATE` or `DELETE`. The 50,000-job dataset still loads from `data/clean/`.
 
 ## Phase 6 — User accounts and roles
 
@@ -120,7 +121,7 @@ What each role can do:
 The last row is the point: not even an admin can rewrite the record. Roles decide who can *add* to the history, and every addition is stamped with who made it.
 
 - [x] `User` and `Accounts` classes in `accounts.py`: username, hashed password, role, and an active flag (accounts are deactivated, never deleted, so old entries still show who made them)
-- [ ] Save the accounts in a `users` table once the database exists (Phase 5)
+- [ ] Save the accounts in a `users` table once the database exists (Phase 5). For now they're in `users.csv` (password hashes only, kept off GitHub), made with `add_user.py` and `change_password.py`
 - [x] Never store plain passwords: hash them with a salt using Python's built-in `hashlib`
 - [x] `login(username, password)`: returns the user if the password matches, or `None` if not
 - [x] Permissions as a dictionary of role → allowed actions, plus a `can(user, action)` check
@@ -141,19 +142,23 @@ Working so far (run `python app.py`): a home page that explains Hangar, the job 
 
 **Demo mode.** `demo_data.py` builds 200 made-up jobs, and the `DEMO` switch at the top of `app.py` picks which data the site uses (`True` = made-up jobs, `False` = the real dataset). In demo mode, a gold banner on every page says the data is made up. This lets the site be shown to anyone without the private dataset.
 
-- [ ] HTML basics: tags, headings, paragraphs, links, tables, forms, inputs, and buttons
-- [ ] CSS basics: colors, fonts, spacing, and simple layouts
+- [x] HTML basics: tags, headings, paragraphs, links, tables, forms, inputs, and buttons
+- [x] CSS basics: colors, fonts, spacing, and simple layouts
 - [ ] JavaScript basics in the browser: finding elements on the page, responding to button clicks, and `fetch()` to ask Python for data
 - [x] Connect the page to Python with Flask (a small library that lets Python answer requests from a web page)
 - [x] Demo mode with made-up data (`demo_data.py`), so the site can be shown publicly
-- [ ] Login page
-- [ ] Job list: search by job ID, filter by depot and status
-- [ ] Job page: original vs. current target, the full estimate history with real dates, and each delay with its cause and who logged it
-- [ ] Log-a-delay form (employee and manager)
-- [ ] Open and close jobs (manager)
-- [ ] Reports page: the on-time comparison and slip by cause (manager and admin)
-- [ ] Account management page (admin)
-- [ ] Show only the buttons each role can use, but still check permissions in Python (hiding a button isn't security)
+- [x] Login page, with a 10-minute lockout after 5 wrong passwords
+- [x] Job list: search all 50,000 jobs by job ID, asset, or status, 100 per page
+- [ ] Job list: filter by depot
+- [x] Job page: original vs. current target, the full estimate history, and each delay with its cause and who logged it
+- [ ] Job page: real dates next to the day counts
+- [x] Log-a-delay form (employee and manager)
+- [x] Open and close jobs (manager)
+- [x] Reports page: the on-time comparison and slip by cause (public, read-only)
+- [ ] Account management page (admin); for now accounts are made with `add_user.py` and `change_password.py`
+- [x] Show only the buttons each role can use, but still check permissions in Python (hiding a button isn't security)
+- [x] Put the site online (PythonAnywhere): [jnguyentech.pythonanywhere.com](https://jnguyentech.pythonanywhere.com)
+- [ ] Phone quick-log page, with a QR code for each job, so mechanics can log a delay the moment they find it
 
 **Step B — Rebuild the pages in React.** React is a JavaScript library for building pages out of reusable pieces called components (for example, one `JobCard` component used for every job in the list). It's what most companies use, so it's a strong resume skill. Start only once Step A works, so there's a working version to compare against, the same way Phase 2 was checked against Phase 1.
 
@@ -173,11 +178,12 @@ The poster uses the Phase 4 results, described the way the mentor approved. If t
 
 - [x] Name and logo: Hangar, with navy and white versions on see-through backgrounds
 - [x] Career fair prep (Oct 9): a 30-second pitch and phone screenshots of the demo (made-up data only)
-- [ ] Abstract (150–250 words), framed as tool + case study: question, why it matters, what was built, findings, implications
-- [ ] Rough poster draft to the mentor
-- [ ] Poster design: an Air Force and aviation look that draws people in. Deep navy background, Air Force-style blue for headings and the key chart bars, silver gray, and one gold accent for the headline numbers. Ideas: runway-stripe dividers, a flight-path line linking the sections, a faint blueprint grid, stencil-style section labels, and the job timeline drawn as a flight plan. No official logos or seals, and nothing that brands the poster as a specific base.
-- [ ] Recolor the charts to match the poster (the colors are set once at the top of `charts.py`)
-- [ ] Final poster (42" × 36", made in Canva and exported to PDF) using the Technical category sections: overview, goal, design process, technology, results, reflection
+- [x] Abstract (150–250 words), framed as tool + case study: question, why it matters, what was built, findings, implications (submitted)
+- [x] Rough poster draft to the mentor (approved: real results and Tinker wording OK)
+- [x] Poster design: an Air Force and aviation look that draws people in. Deep navy background, Air Force-style blue for headings and the key chart bars, silver gray, and one gold accent for the headline numbers. Ideas: runway-stripe dividers, a flight-path line linking the sections, a faint blueprint grid, stencil-style section labels, and the job timeline drawn as a flight plan. No official logos or seals, and nothing that brands the poster as a specific base.
+- [x] Recolor the charts to match the poster (the colors are set once at the top of `charts.py`)
+- [x] Final poster (42" × 36", made in Canva) with website screenshots, a QR code to the live site, and a conclusion; print-ready PowerPoint version made
+- [ ] Submit the poster to the OCCC Printshop as a PowerPoint (due Oct 30)
 - [ ] Practice a 1–2 minute pitch and likely questions (for example: "Why not just use a spreadsheet?", "How would this connect to the Air Force's real systems?", "What else could this tool track?", "What if a worker's delay estimate is wrong?", and "Why can't an admin edit the history?")
 
 ## Phase 9 — After the tracker is finished
@@ -193,6 +199,7 @@ The poster uses the Phase 4 results, described the way the mentor approved. If t
 - [ ] Optional third scenario outside defense (for example, airline engine repair or IT repair tickets)
 - [ ] Work type: add a work-type field to jobs (for example scheduled overhaul, modification, or emergency) and report slip by work type, like real maintenance systems do. Needs data that includes work types.
 - [ ] Estimate accuracy: record how long each delay actually took once fixed, and report how far off workers' estimates run for each category (for example, "discovered-work estimates run 40% low")
-- [ ] Public demo deployment
+- [x] Public deployment (PythonAnywhere, real dataset; renew the free site once a month)
 - [ ] Short walkthrough video
-- [ ] Resume and LinkedIn write-up; use the project when applying to the 76th Software Engineering Group, depot-IT contractor, and aviation maintenance software roles
+- [x] LinkedIn project entry with the poster
+- [ ] Resume write-up; use the project when applying to the 76th Software Engineering Group, depot-IT contractor, and aviation maintenance software roles

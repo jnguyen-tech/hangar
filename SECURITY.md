@@ -1,21 +1,19 @@
 # Security Policy
 
-## Supported Versions
+Hangar is a student portfolio project. It isn't connected to any Air Force or other maintenance system, and the data it uses is synthetic.
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+## What's supported
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+Only the latest code on the `main` branch, and the live site at https://jnguyentech.pythonanywhere.com, get fixes.
 
-## Reporting a Vulnerability
+## How it protects itself
 
-Use this section to tell people how to report a vulnerability.
+- Passwords are never stored. Only a salted hash is kept, and the accounts file (`users.csv`) never goes to GitHub.
+- After 5 wrong passwords in a row, an account is locked for 10 minutes.
+- Every form checks the logged-in user's role on the server, not just in the page.
+- Database queries use `?` placeholders, so typed text can't change the SQL.
+- The history is append-only: database triggers refuse any edit or delete.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+## Reporting a problem
+
+If you find a security problem, please don't open a public issue. Email john.nguyen4@my.occc.edu with what you found and how to reproduce it. I'll reply within a week.
