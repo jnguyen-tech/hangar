@@ -417,7 +417,8 @@ def job_qr(job_id):
     # _external=True gives the full web address (with https://...), which a phone needs.
     link = url_for("quick_log", job_id=job_id, _external=True)
     # segno makes the QR code as an SVG picture, written as text we can put in the page.
-    qr_svg = segno.make(link, error="m").svg_inline(scale=12, dark="#0B1F3A")
+    # omitsize=True lets the picture shrink to fit a phone screen without getting cut off.
+    qr_svg = segno.make(link, error="m").svg_inline(scale=12, dark="#0B1F3A", omitsize=True)
     return render_template("job_qr.html", job=job, link=link, qr_svg=qr_svg)
 
 

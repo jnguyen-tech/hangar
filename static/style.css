@@ -204,9 +204,20 @@ tr:hover td {
 /* The printable QR label */
 .qr-label {
     display: inline-block;
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 16px;
     border: 2px dashed var(--navy);
     text-align: center;
+}
+
+/* Shrink the QR picture to fit small screens (height: auto keeps it square) */
+.qr-label svg {
+    display: block;
+    width: 360px;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
 }
 
 .qr-job {
