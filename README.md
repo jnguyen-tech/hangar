@@ -57,7 +57,7 @@ All durations are **calendar days**: every day counts, including weekends and ho
 
 No role can rewrite the record, not even an admin. Roles decide who can add to the history, never who can change it. (This is a demo login; real Air Force systems use CAC cards and single sign-on.)
 
-**A web interface**, so the tracker can be used from a browser instead of the command line. It runs on plain HTML and CSS, connected to Python with Flask. Run `python app.py`, then open `http://127.0.0.1:5000` to see a home page, a job list with a search across every job and Previous / Next pages, a page for each job's full estimate history and delays, and the reports. It uses the 50,000-job dataset when the data files are present, and otherwise runs in demo mode on 200 made-up jobs from `demo_data.py`, with a banner on every page saying so. Anyone can view jobs and reports. Logging in unlocks forms based on your role: employees can log delays, managers can also open and close jobs, and every delay is stamped with who logged it. Accounts are made with `python add_user.py`, which saves only password hashes to `users.csv` (kept off GitHub). After 5 wrong passwords in a row, an account is locked for 10 minutes, so passwords can't be guessed over and over. After that, the pages get rebuilt in React and then animated, including a timeline that shows a job's target date sliding out with each delay while the original stays pinned. Python keeps handling the logic and the database.
+**A web interface**, so the tracker can be used from a browser instead of the command line. It runs on plain HTML and CSS, connected to Python with Flask. Run `python app.py`, then open `http://127.0.0.1:5000` to see a home page, a job list with a search across every job and Previous / Next pages, a page for each job's full estimate history and delays, and the reports. It uses the 50,000-job dataset when the data files are present, and otherwise runs in demo mode on 200 made-up jobs from `demo_data.py`, with a banner on every page saying so. Anyone can view jobs and reports. Logging in unlocks forms based on your role: employees can log delays, managers can also open and close jobs, and every delay is stamped with who logged it. Accounts are made with `python add_user.py`, which saves only password hashes to `users.csv` (kept off GitHub). After 5 wrong passwords in a row, an account is locked for 10 minutes, so passwords can't be guessed over and over. Each open job also has a printable QR code: a mechanic scans it with a phone and lands on a big-button quick-log page for that job, so a delay is recorded the moment it's found. After that, the pages get rebuilt in React and then animated, including a timeline that shows a job's target date sliding out with each delay while the original stays pinned. Python keeps handling the logic and the database.
 
 ## Running it
 
@@ -91,7 +91,7 @@ Its last section compares each ship's actual overhaul length against three diffe
 The website needs two libraries, Flask and matplotlib (the reports page reuses code from `charts.py`). Install them once:
 
 ```
-python -m pip install flask matplotlib
+python -m pip install flask matplotlib segno
 ```
 
 Then, from the project folder:
@@ -183,11 +183,11 @@ maintenance-delay-tracker/
 │   Web interface (Phase 7)
 ├── app.py                  # the website: Flask matches each page address to the Python that builds it
 ├── demo_data.py            # 200 made-up jobs, used when the data files aren't there
-├── requirements.txt        # the packages the website needs (Flask and matplotlib)
+├── requirements.txt        # the packages the website needs (Flask, matplotlib, and segno for QR codes)
 ├── add_user.py             # makes a website login; saves only the password hash to users.csv
 ├── change_password.py      # gives an existing login a new password
 ├── database.py             # saves website changes to SQLite; append-only (edits and deletes are blocked)
-├── templates/              # the HTML pages: home, job list, one job, new job, log in, reports
+├── templates/              # the HTML pages: home, job list, one job, new job, quick log, QR code, log in, reports
 ├── static/                 # style.css (the look) and the Hangar logo
 │
 │   Study guides and checking tools

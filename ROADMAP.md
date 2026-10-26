@@ -2,7 +2,7 @@
 
 The project is **Hangar**, a general maintenance delay tracker, built in phases. Each phase ends with something that runs, and each one builds on the last instead of replacing it.
 
-**Current focus (late Oct 2026): Scholar's Day on Nov 17.** The tracker works end to end and is live: cleaned data, results, a SQLite database, user accounts, and a web interface. Next up is the phone quick-log page, then practicing the pitch. The Navy case study already runs (in plain Python) and is on hold until the tracker is finished (Phase 9).
+**Current focus (late Oct 2026): Scholar's Day on Nov 17.** The tracker works end to end and is live: cleaned data, results, a SQLite database, user accounts, and a web interface. The phone quick-log page with per-job QR codes is done. Next up is practicing the pitch. The Navy case study already runs (in plain Python) and is on hold until the tracker is finished (Phase 9).
 
 One rule across every phase: be able to explain every line out loud. Scholar's Day judges score "Depth of Understanding" and will ask questions. If a piece of code can't be explained, it isn't finished yet.
 
@@ -158,7 +158,8 @@ Working so far (run `python app.py`): a home page that explains Hangar, the job 
 - [ ] Account management page (admin); for now accounts are made with `add_user.py` and `change_password.py`
 - [x] Show only the buttons each role can use, but still check permissions in Python (hiding a button isn't security)
 - [x] Put the site online (PythonAnywhere): [jnguyentech.pythonanywhere.com](https://jnguyentech.pythonanywhere.com)
-- [ ] Phone quick-log page, with a QR code for each job, so mechanics can log a delay the moment they find it
+- [x] Phone quick-log page, with a QR code for each job, so mechanics can log a delay the moment they find it
+- [x] Phone-friendly layout on every page (so the poster's QR code opens a readable site)
 
 **Step B — Rebuild the pages in React.** React is a JavaScript library for building pages out of reusable pieces called components (for example, one `JobCard` component used for every job in the list). It's what most companies use, so it's a strong resume skill. Start only once Step A works, so there's a working version to compare against, the same way Phase 2 was checked against Phase 1.
 

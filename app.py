@@ -5,6 +5,8 @@
 
 import os
 import time
+from datetime import date, datetime
+import segno
 from flask import Flask, render_template, request, redirect, url_for, abort, session
 from load_data import load_tracker, CLEAN_FOLDER
 from charts import count_on_time
@@ -274,6 +276,26 @@ def new_job():
     return render_template("new_job.html", error=error, form=request.form)
 
 
+def check_and_log_delay(user, job_id, day, days_added, category, description):
+    """Check a delay, then log it and save it. Used by both delay forms.
+
+    Returns an error message if something is wrong, or None if it worked.
+    """
+    if day is None or days_added is None:
+        return "Day logged and days added must be whole numbers."
+    if description == "":
+        return "Please describe what caused the delay."
+    if len(description) > 200:
+        return "Please keep the description under 200 characters."
+
+    # logged_by stamps the delay with who entered it.
+    error = tracker.log_delay(job_id, day, category, description, days_added,
+                              logged_by=user.username)
+    if error is None:
+        database.save_delay(DB_FILE, job_id, day, category, description, days_added, user.username)
+    return error
+
+
 @app.route("/jobs/<job_id>/delay", methods=["POST"])
 def add_delay(job_id):
     """Log a delay on an open job. This adds a new estimate version too."""
@@ -285,19 +307,7 @@ def add_delay(job_id):
     days_added = whole_number(request.form["days_added"])
     category = request.form["category"]
     description = request.form["description"].strip()
-
-    if day is None or days_added is None:
-        error = "Day logged and days added must be whole numbers."
-    elif description == "":
-        error = "Please describe what caused the delay."
-    elif len(description) > 200:
-        error = "Please keep the description under 200 characters."
-    else:
-        # logged_by stamps the delay with who entered it.
-        error = tracker.log_delay(job_id, day, category, description, days_added,
-                                  logged_by=user.username)
-        if error is None:
-            database.save_delay(DB_FILE, job_id, day, category, description, days_added, user.username)
+    error = check_and_log_delay(user, job_id, day, days_added, category, description)
 
     # Go back to the job's page either way. If something went wrong,
     # put the message in the address so the page can show it.
@@ -327,6 +337,91 @@ def close_job(job_id):
 
 
 # ---------------------------------------------------------------------------
+# Phone quick-log: a mechanic scans a job's QR code and logs a delay on the spot
+# ---------------------------------------------------------------------------
+
+def days_since_opened(job_id):
+    """How many days ago the job was opened on the website, or None if we don't know.
+
+    Jobs opened on the website have their opening time saved in the database.
+    The 50,000 dataset jobs don't, but they're all closed anyway.
+    """
+    opened_at = database.job_opened_on(DB_FILE, job_id)
+    if opened_at is None:
+        return None
+    # The database stores times as text like "2026-10-25T14:05:31".
+    # fromisoformat() turns that text back into a date we can subtract.
+    opened_date = datetime.fromisoformat(opened_at).date()
+    return (date.today() - opened_date).days
+
+
+@app.route("/quick/<job_id>", methods=["GET", "POST"])
+def quick_log(job_id):
+    """A big-button page for logging a delay from a phone."""
+    user = current_user()
+    if user is None:
+        # Not logged in: go log in, then come straight back here.
+        return redirect(url_for("login", next=url_for("quick_log", job_id=job_id)))
+    if not can(user, "log_delay"):
+        abort(403)
+
+    job = tracker.find_job(job_id)
+    if job is None:
+        return "Job not found", 404
+
+    day = days_since_opened(job_id)
+    error = None
+    logged = None
+    # After a delay is logged, the page reloads with ?logged=... so it can say
+    # what was saved. (See the redirect below.)
+    if request.args.get("logged"):
+        logged = {"category": request.args.get("logged"), "days_added": request.args.get("added", "")}
+
+    if request.method == "POST" and job.status == "open":
+        # If we know when the job opened, the day is filled in automatically.
+        if day is None:
+            day = whole_number(request.form.get("day", ""))
+        days_added = whole_number(request.form["days_added"])
+        # Each cause is its own button, so the button that was tapped tells us the cause.
+        category = request.form["category"]
+        description = request.form["description"].strip()
+        if description == "":
+            description = category.replace("_", " ") + " (quick log)"
+        error = check_and_log_delay(user, job_id, day, days_added, category, description)
+        if error is None:
+            # Send the phone to a fresh copy of this page. Without this, hitting
+            # refresh would send the form again and log the same delay twice.
+            return redirect(url_for("quick_log", job_id=job_id, logged=category, added=days_added))
+
+    return render_template(
+        "quick_log.html",
+        job=job,
+        day=day,
+        error=error,
+        logged=logged,
+        categories=tracker.categories,
+        original=tracker.get_original_estimate(job_id).target_days,
+        current=tracker.get_current_estimate(job_id).target_days,
+    )
+
+
+@app.route("/jobs/<job_id>/qr")
+def job_qr(job_id):
+    """A printable QR code that opens this job's quick-log page."""
+    if not can(current_user(), "open_job"):
+        abort(403)
+    job = tracker.find_job(job_id)
+    if job is None:
+        return "Job not found", 404
+
+    # _external=True gives the full web address (with https://...), which a phone needs.
+    link = url_for("quick_log", job_id=job_id, _external=True)
+    # segno makes the QR code as an SVG picture, written as text we can put in the page.
+    qr_svg = segno.make(link, error="m").svg_inline(scale=12, dark="#0B1F3A")
+    return render_template("job_qr.html", job=job, link=link, qr_svg=qr_svg)
+
+
+# ---------------------------------------------------------------------------
 # Logging in and out
 # ---------------------------------------------------------------------------
 
@@ -343,7 +438,7 @@ def login():
         record = failed_logins.get(username)
         if record is not None and record["locked_until"] > time.time():
             error = f"Too many wrong tries. Please wait {LOCKOUT_MINUTES} minutes and try again."
-            return render_template("login.html", error=error)
+            return render_template("login.html", error=error, next_page=request.form.get("next", ""))
 
         user = accounts.login(username, password)
         if user is None:
@@ -364,8 +459,15 @@ def login():
                 del failed_logins[username]
             session.clear()
             session["username"] = user.username
+            # If the login page was sent here from another page (like a quick-log
+            # QR code), go back there. Only allow pages on this site: a "next"
+            # that starts with "//" or "http", or has a backslash, could send
+            # people to a different website.
+            next_page = request.form.get("next", "")
+            if next_page.startswith("/") and not next_page.startswith("//") and "\\" not in next_page:
+                return redirect(next_page)
             return redirect(url_for("home"))
-    return render_template("login.html", error=error)
+    return render_template("login.html", error=error, next_page=request.args.get("next", request.form.get("next", "")))
 
 
 @app.route("/logout")

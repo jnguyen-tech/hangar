@@ -129,6 +129,22 @@ def save_closed_job(db_file, job_id, actual_days, username):
     connection.close()
 
 
+def job_opened_on(db_file, job_id):
+    """When a job was opened on the website, as text like "2026-10-25T14:05:31".
+
+    Returns None if the job wasn't opened on the website (for example, the
+    50,000 dataset jobs).
+    """
+    connection = sqlite3.connect(db_file)
+    row = connection.execute(
+        "SELECT opened_at FROM jobs_opened WHERE job_id = ?", [job_id]).fetchone()
+    connection.close()
+    # fetchone() gives one row (a tuple), or None if nothing matched.
+    if row is None:
+        return None
+    return row[0]
+
+
 # --- Loading changes back ----------------------------------------------------
 
 def replay_history(db_file, tracker):

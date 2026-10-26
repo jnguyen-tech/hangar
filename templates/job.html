@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Tells phones to use their real screen width instead of a zoomed-out desktop view. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ job.job_id }} - Hangar</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -117,6 +119,13 @@
         <!-- The forms only show for an OPEN job, and only to someone whose role allows it. -->
         {% if job.status == "open" and not user %}
         <p class="note"><a href="/login">Log in</a> to log delays on this job.</p>
+        {% endif %}
+
+        {% if job.status == "open" and (can_log_delay or can_open_job) %}
+        <p>
+            {% if can_log_delay %}<a href="/quick/{{ job.job_id }}">Phone quick-log page</a>{% endif %}
+            {% if can_open_job %} · <a href="/jobs/{{ job.job_id }}/qr">Print this job's QR code</a>{% endif %}
+        </p>
         {% endif %}
 
         {% if job.status == "open" and can_log_delay %}

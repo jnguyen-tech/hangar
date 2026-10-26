@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Tells phones to use their real screen width instead of a zoomed-out desktop view. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quick log {{ job.job_id }} - Hangar</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    {% if demo %}
+    <p class="demo-banner">Demo version: every job on this site is made-up sample data.</p>
+    {% endif %}
+    <header>
+        <h1><img src="/static/hangar-logo-navy.png" alt="Hangar" class="logo"></h1>
+        <p>Keeps the original plan on record, so a job can't look on time just because its deadline moved.</p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/jobs">Jobs</a>
+            <a href="/reports">Reports</a>
+            {% if can_open_job %}
+            <a href="/jobs/new">New job</a>
+            {% endif %}
+            <!-- "user" is the logged-in person, or nothing if nobody is logged in. -->
+            {% if user %}
+            <span class="signed-in">{{ user.username }} ({{ user.role }})</span>
+            <a href="/logout">Log out</a>
+            {% else %}
+            <a href="/login">Log in</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="quick">
+        <h2>{{ job.job_id }}</h2>
+        <p>Asset: {{ job.asset }}. Original target: {{ original }} days. Current target: {{ current }} days.</p>
+
+        {% if logged %}
+        <p class="success">Logged: {{ logged.category.replace("_", " ") }}, +{{ logged.days_added }} days.
+            The target is now {{ current }} days. The original stays {{ original }}.</p>
+        {% endif %}
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if job.status != "open" %}
+        <p class="error">This job is closed, so no more delays can be logged.</p>
+        {% else %}
+        <form method="post">
+            {% if day is none %}
+            <label for="day">Day logged (days since the job opened)</label>
+            <input type="number" id="day" name="day" min="0" required>
+            {% else %}
+            <p class="note">Day {{ day }} since the job opened (filled in for you).</p>
+            {% endif %}
+
+            <label for="days_added">How many days does this add?</label>
+            <input type="number" id="days_added" name="days_added" min="1" required>
+
+            <label for="description">What happened? (optional)</label>
+            <input type="text" id="description" name="description" maxlength="200">
+
+            <p><strong>Tap the cause to log it:</strong></p>
+            <!-- Each button sends name="category" with its own value, so the
+                 button you tap is the cause that gets saved. -->
+            {% for category in categories %}
+            <button type="submit" name="category" value="{{ category }}" class="cause-button">
+                {{ category.replace("_", " ") }}
+            </button>
+            {% endfor %}
+        </form>
+        {% endif %}
+
+        <p><a href="/jobs/{{ job.job_id }}">See this job's full history</a></p>
+    </main>
+</body>
+</html>

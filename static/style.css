@@ -163,3 +163,75 @@ tr:hover td {
     margin-right: 16px;
     color: var(--blue);
 }
+
+/* Phone quick-log page: big, easy-to-tap buttons (even with gloves on) */
+.quick label {
+    display: block;
+    margin-top: 14px;
+    font-weight: bold;
+}
+
+.quick input {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    font-size: 18px;
+    box-sizing: border-box;   /* keeps padding inside the width */
+}
+
+.cause-button {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 10px 0;
+    padding: 18px;
+    font-size: 20px;
+    background: var(--blue);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: capitalize;
+}
+
+/* A green box for "it worked" messages */
+.success {
+    background: #E8F5E9;
+    border-left: 6px solid #2E7D32;
+    padding: 10px 14px;
+}
+
+/* The printable QR label */
+.qr-label {
+    display: inline-block;
+    padding: 16px;
+    border: 2px dashed var(--navy);
+    text-align: center;
+}
+
+.qr-job {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 8px 0 0 0;
+}
+
+/* Small screens (phones): less padding, smaller logo, and tables that scroll sideways */
+@media (max-width: 600px) {
+    header {
+        padding: 16px;
+    }
+    .logo {
+        height: 70px;
+    }
+    nav a {
+        margin-right: 14px;
+    }
+    main {
+        margin: 16px 8px;
+        padding: 16px;
+    }
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+}

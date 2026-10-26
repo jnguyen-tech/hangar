@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Tells phones to use their real screen width instead of a zoomed-out desktop view. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Log in - Hangar</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -37,6 +39,9 @@
         {% endif %}
 
         <form method="post" class="edit-form">
+            <!-- type="hidden" sends a value without showing a box: here, the page to go back to after logging in. -->
+            <input type="hidden" name="next" value="{{ next_page }}">
+
             <label for="username">Username</label>
             <input type="text" id="username" name="username" required>
 
